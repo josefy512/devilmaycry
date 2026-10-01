@@ -1,5 +1,5 @@
-import TesoreriaDashboard from './componentes/tesoreria/tesoreria';
+import FormularioDashboard from './componentes/formulario/formulario';
 
 export default function App() {
-  return <TesoreriaDashboard />;
+  return <FormularioDashboard />;
 }
