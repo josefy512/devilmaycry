@@ -1,3 +1,4 @@
+import { supabase } from '../../supabaseClient';
 import { useState, useEffect, type FormEvent } from 'react';
 import {
   GraduationCap,
@@ -44,6 +45,7 @@ export default function LoginForm() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (!codigo.trim()) {
       setError('Ingresa tu DNI o código de alumno.');
       return;
@@ -52,11 +54,34 @@ export default function LoginForm() {
       setError('Ingresa tu contraseña.');
       return;
     }
-    setSubmitting(true);
-    setError(null);
-    await new Promise((r) => setTimeout(r, 900));
+
+    try {
+    if (role === 'alumno') {
+      // Busca en la tabla 'alumnos' coincidencia exacta con la columna 'codigo'
+      const { data, error: dbError } = await supabase
+        .from('alumnos')
+        .select('*')
+        .eq('codigo', codigo.trim())
+        .maybeSingle();
+
+      if (dbError) throw dbError;
+
+      if (!data) {
+        setError('Código de alumno no encontrado en el sistema.');
+        return;
+      }
+
+      // Si lo encuentra
+      alert(`¡Bienvenido/a ${data.nombres} ${data.apellidos}!\nCarrera: ${data.carrera}`);
+    } else {
+      setError(`Acceso restringido para el rol: ${role}`);
+    }
+  } catch (err) {
+    console.error('Error al conectar:', err);
+    setError('Error de conexión con la base de datos.');
+  } finally {
     setSubmitting(false);
-    setError('Credenciales no registradas. Verifica tus datos.');
+  }
   };
 
   return (
@@ -166,10 +191,8 @@ export default function LoginForm() {
                     type="text"
                     value={codigo}
                     onChange={(e) =>
-                      setCodigo(e.target.value.replace(/[^\d]/g, '').slice(0, 12))
-                    }
-                    placeholder="12345678"
-                    inputMode="numeric"
+                      setCodigo(e.target.value)}
+                    placeholder="Ej. ST -1"
                     autoComplete="username"
                     className="w-full rounded-xl border border-white/15 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-blue-200/40 transition-all duration-200 focus:border-white/40 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
                   />
