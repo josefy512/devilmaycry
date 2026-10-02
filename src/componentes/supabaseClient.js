@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../supabaseClient';
 
 // Obtiene las variables definidas en tu archivo .env.local
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
