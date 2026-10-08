@@ -42,7 +42,7 @@ type MenuGroup ={
     items: MenuItem[];
 };
 
-const menuGroups: MenuGroup[
+const menuGroups: MenuGroup[] = [
     {
         items: [
             {id: 'panel', label: 'Panel de control', icon: <LayoutDashboard className="h-4" "w-4" /> }
