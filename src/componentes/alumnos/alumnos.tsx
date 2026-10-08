@@ -45,7 +45,7 @@ type MenuGroup ={
 const menuGroups: MenuGroup[] = [
     {
         items: [
-            {id: 'panel', label: 'Panel de control', icon: <LayoutDashboard className="h-4" "w-4" /> }
+            {id: 'panel', label: 'Panel de control', icon: <LayoutDashboard className="h-4 w-4" /> }
         ]    
     },
    {
