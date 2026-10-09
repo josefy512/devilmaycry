@@ -1,4 +1,4 @@
-import FormularioDashboard from './componentes/alumnos/alumnos';
+import AlumnosDashboard from './componentes/alumnos/alumnos';
 
 export default function App() {
   return <AlumnosDashboard />;
