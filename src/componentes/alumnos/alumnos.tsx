@@ -1,4 +1,5 @@
 import TareasProyectos from './tareas_y_proyectos/tareas_y_proyectos';
+import Directorio from "./directorio/directorio";
 import { useState } from "react";
 import { 
   LayoutDashboard,
@@ -186,7 +187,7 @@ const renderView = () => {
       case 'foros':
         return <PlaceholderView title="Foros de Discusión Estudiantil" />;
       case 'directorio':
-        return <PlaceholderView title="Directorio de Docentes y Compañeros" />;
+        return <DirectorioView />;
       case 'progreso':
         return <PlaceholderView title="Mi Progreso Académico" />;
       case 'bolsa':
