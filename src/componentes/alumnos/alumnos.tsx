@@ -1,5 +1,5 @@
 import TareasProyectos from './tareas_y_proyectos/tareas_y_proyectos';
-import Directorio from "./directorio/directorio";
+import DirectorioView from './directorio/directorio';
 import { useState } from "react";
 import { 
   LayoutDashboard,
