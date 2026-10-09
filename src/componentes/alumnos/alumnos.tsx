@@ -1,3 +1,4 @@
+import TareasProyectos from './tareas_y_proyectos/tareas_y_proyectos';
 import { useState } from "react";
 import { 
   LayoutDashboard,
@@ -179,7 +180,7 @@ const renderView = () => {
       case 'calendario':
         return <PlaceholderView title="Calendario Académico" />;
       case 'tareas':
-        return <PlaceholderView title="Gestión de Tareas y Proyectos" />;
+        return <TareasProyectos />;
       case 'recursos':
         return <PlaceholderView title="Recursos de Estudio y Biblioteca" />;
       case 'foros':
