@@ -1,52 +1,182 @@
 import React, { useState } from 'react';
 import { 
-  Search, 
-  Bell, 
+  LayoutDashboard, 
   CheckSquare, 
   Users, 
-  Clock, 
   Calendar, 
-  FileText, 
   BookOpen, 
+  Award, 
+  Settings, 
+  LogOut, 
+  Search, 
+  Bell, 
   AlertCircle, 
   TrendingUp, 
-  ClipboardList, 
-  Plus, 
   MessageSquare, 
-  HelpCircle, 
+  FileCheck2, 
   Eye, 
-  Award, 
-  Send, 
+  Clock, 
   Upload, 
+  Send, 
+  HelpCircle, 
   ChevronRight, 
   Menu, 
-  X,
-  FileCheck2,
-  ShieldAlert
+  X 
 } from 'lucide-react';
 
-export default function DocentesDashboard() {
+type DocenteSectionId = 'panel' | 'calificaciones' | 'asistencias' | 'horarios' | 'cursos' | 'configuracion';
+
+export default function DocentesLayout() {
+  const [activeSection, setActiveSection] = useState<DocenteSectionId>('panel');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const navigationItems = [
+    { id: 'panel', label: 'Panel de control', icon: LayoutDashboard },
+    { id: 'calificaciones', label: 'Calificaciones', icon: Award },
+    { id: 'asistencias', label: 'Asistencias', icon: CheckSquare },
+    { id: 'horarios', label: 'Horarios', icon: Calendar },
+    { id: 'cursos', label: 'Mis Cursos', icon: BookOpen },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#0B0F17] text-slate-100 p-4 sm:p-6 space-y-6 font-sans">
+    <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex font-sans">
       
-      {/* 1. Header Superior Responsivo */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-        <div className="flex items-center justify-between w-full md:w-auto">
-          <div>
-            <span className="text-xs text-slate-400 font-medium">Docente / Panel de Control</span>
-            <h1 className="text-xl font-bold text-white tracking-tight">Resumen del Día</h1>
+      {/* Overlay para cerrar el menú en móviles */}
+      {mobileMenuOpen && (
+        <div 
+          onClick={() => setMobileMenuOpen(false)}
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
+        />
+      )}
+
+      {/* 1. BARRA LATERAL (SIDEBAR) */}
+      <aside 
+        className={`fixed lg:static top-0 bottom-0 left-0 z-50 w-64 bg-[#131927] border-r border-slate-800/80 p-5 flex flex-col justify-between transition-transform duration-300 ease-in-out ${
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}
+      >
+        <div className="space-y-6">
+          {/* Perfil del Docente en el Header del Sidebar */}
+          <div className="flex items-center justify-between pb-4 border-b border-slate-800/80">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-sm text-white shadow-md shadow-blue-500/20">
+                MR
+              </div>
+              <div className="overflow-hidden">
+                <h2 className="font-bold text-sm text-white truncate">Marta Rodríguez</h2>
+                <p className="text-[11px] text-slate-400 truncate">Gestión Académica</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setMobileMenuOpen(false)}
+              className="lg:hidden p-1 text-slate-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <button 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-slate-400 hover:text-white bg-[#131927] rounded-lg border border-slate-800"
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+
+          {/* Menú de Navegación Principal */}
+          <nav className="space-y-1.5">
+            {navigationItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeSection === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveSection(item.id as DocenteSectionId);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                    isActive 
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' 
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+        {/* Sección Inferior: Configuración y Cerrar Sesión */}
+        <div className="space-y-1.5 pt-4 border-t border-slate-800/80">
+          <button
+            onClick={() => {
+              setActiveSection('configuracion');
+              setMobileMenuOpen(false);
+            }}
+            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+              activeSection === 'configuracion'
+                ? 'bg-blue-600 text-white'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
+          >
+            <Settings className="w-4 h-4 text-slate-400" />
+            <span>Configuración</span>
+          </button>
+
+          <button
+            onClick={() => alert('Cerrando sesión...')}
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* 2. ÁREA DE CONTENIDO PRINCIPAL */}
+      <div className="flex-1 flex flex-col min-w-0">
+        
+        {/* Header Móvil (Botón Hamburguesa para pantallas pequeñas) */}
+        <div className="lg:hidden bg-[#131927] border-b border-slate-800 p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-2 text-slate-400 hover:text-white bg-[#0B0F17] rounded-lg border border-slate-800"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <span className="font-bold text-sm text-white">Progresa • Docentes</span>
+          </div>
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-xs text-white">
+            MR
+          </div>
+        </div>
+
+        {/* Contenido Dinámico de la Vista */}
+        <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 overflow-y-auto">
+          {activeSection === 'panel' && <PanelControlDocente />}
+          {activeSection !== 'panel' && (
+            <div className="bg-[#131927] border border-slate-800 rounded-2xl p-8 text-center space-y-3">
+              <h2 className="text-lg font-bold text-white capitalize">Módulo de {activeSection}</h2>
+              <p className="text-xs text-slate-400">Esta sección se encuentra lista para su desarrollo.</p>
+            </div>
+          )}
+        </main>
+
+      </div>
+
+    </div>
+  );
+}
+
+{/* VISTA INTERNA: PANEL DE CONTROL DOCENTE */}
+function PanelControlDocente() {
+  return (
+    <div className="space-y-6">
+      
+      {/* Header Superior y Buscador */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <span className="text-xs text-slate-400 font-medium">Docente / Panel de Control</span>
+          <h1 className="text-xl font-bold text-white tracking-tight">Resumen del Día</h1>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <div className="relative flex-1 sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input 
@@ -56,29 +186,17 @@ export default function DocentesDashboard() {
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3">
-            <button className="p-2.5 bg-[#131927] border border-slate-800 rounded-xl text-slate-400 hover:text-white transition-colors relative">
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
-            </button>
-
-            <div className="flex items-center gap-3 pl-3 border-l border-slate-800">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-xs text-white shadow-md shadow-blue-500/10">
-                MR
-              </div>
-              <div className="hidden sm:block text-left">
-                <p className="font-semibold text-xs text-slate-200">Marta Rodríguez</p>
-                <p className="text-[10px] text-slate-400 font-medium">Gestión Académica</p>
-              </div>
-            </div>
-          </div>
+          <button className="p-2.5 bg-[#131927] border border-slate-800 rounded-xl text-slate-400 hover:text-white transition-colors relative self-end sm:self-auto">
+            <Bell className="w-4 h-4" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
+          </button>
         </div>
       </div>
 
-      {/* 2. Tarjetas de Indicadores Rápidos (KPIs) */}
+      {/* Tarjetas de Indicadores Rápidos (KPIs) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        {/* KPI 1: Tareas por calificar */}
+        {/* KPI 1 */}
         <div className="bg-[#131927] border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400">Tareas por calificar</span>
@@ -95,7 +213,7 @@ export default function DocentesDashboard() {
           <p className="text-[11px] text-slate-500 mt-2">Pendientes de revisión en 2 cursos</p>
         </div>
 
-        {/* KPI 2: Asistencia Promedio */}
+        {/* KPI 2 */}
         <div className="bg-[#131927] border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400">Asistencia Promedio</span>
@@ -112,7 +230,7 @@ export default function DocentesDashboard() {
           <p className="text-[11px] text-slate-500 mt-2">Promedio semanal consolidado</p>
         </div>
 
-        {/* KPI 3: Próxima Evaluación */}
+        {/* KPI 3 */}
         <div className="bg-[#131927] border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400">Próxima Evaluación</span>
@@ -127,7 +245,7 @@ export default function DocentesDashboard() {
           <p className="text-[11px] text-slate-500 mt-2">Examen Parcial Ponderado (25%)</p>
         </div>
 
-        {/* KPI 4: Tutorías de Hoy */}
+        {/* KPI 4 */}
         <div className="bg-[#131927] border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400">Tutorías Hoy</span>
@@ -148,13 +266,13 @@ export default function DocentesDashboard() {
 
       </div>
 
-      {/* 3. Bloque Central: Clase Actual + Panel de Control */}
+      {/* Grid Principal: Clase + FUTs (Izquierda) | Agenda + Accesos (Derecha) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* COLUMNA IZQUIERDA: Clase en curso y Tablas de Actividad/FUTs (8 columnas) */}
+        {/* Columna Izquierda (8 columnas) */}
         <div className="lg:col-span-8 space-y-6">
           
-          {/* Tarjeta de Clase Próxima / En Vivo */}
+          {/* Tarjeta de Clase Próxima */}
           <div className="bg-gradient-to-r from-[#131927] via-[#162035] to-[#131927] border border-blue-500/30 rounded-2xl p-5 relative overflow-hidden shadow-xl shadow-blue-950/20">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
               <div className="space-y-2">
@@ -182,7 +300,7 @@ export default function DocentesDashboard() {
             </div>
           </div>
 
-          {/* Tabla de Solicitudes, Justificaciones y FUTs Estudiantiles */}
+          {/* Tabla de FUTs y Trámites */}
           <div className="bg-[#131927] border border-slate-800/80 rounded-2xl p-5 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
               <div>
@@ -190,10 +308,10 @@ export default function DocentesDashboard() {
                   <FileCheck2 className="w-4 h-4 text-blue-400" />
                   <span>Atención de FUTs y Justificaciones Médicas</span>
                 </h3>
-                <p className="text-xs text-slate-400">Trámites y peticiones académicas ingresadas por tus estudiantes</p>
+                <p className="text-xs text-slate-400">Trámites e incidencias de tus alumnos</p>
               </div>
-              <button className="text-xs text-blue-400 font-semibold hover:underline self-start sm:self-auto flex items-center gap-1">
-                <span>Ver todas las solicitudes</span>
+              <button className="text-xs text-blue-400 font-semibold hover:underline flex items-center gap-1">
+                <span>Ver todos</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -215,7 +333,7 @@ export default function DocentesDashboard() {
                       <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold">AG</div>
                       <span>Ana García</span>
                     </td>
-                    <td className="py-3 px-3">Entrega de Proyecto Final (Prorroga)</td>
+                    <td className="py-3 px-3">Entrega de Proyecto Final (Pase FUT)</td>
                     <td className="py-3 px-3 text-slate-400">Hoy, 9:00 AM</td>
                     <td className="py-3 px-3">
                       <span className="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-md font-semibold text-[10px]">
@@ -234,30 +352,11 @@ export default function DocentesDashboard() {
                       <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold">CR</div>
                       <span>Carlos Ruiz</span>
                     </td>
-                    <td className="py-3 px-3">Justificante Médico (FUT de Salud)</td>
+                    <td className="py-3 px-3">Justificante Médico (Salud)</td>
                     <td className="py-3 px-3 text-slate-400">Ayer</td>
                     <td className="py-3 px-3">
                       <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-md font-semibold text-[10px]">
                         Aprobado
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-right">
-                      <button className="p-1.5 bg-[#0B0F17] hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors border border-slate-800">
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
-                    </td>
-                  </tr>
-
-                  <tr className="hover:bg-slate-800/30 transition-colors">
-                    <td className="py-3 px-3 font-medium text-white flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-[10px] font-bold">ED</div>
-                      <span>Elena Díaz</span>
-                    </td>
-                    <td className="py-3 px-3">Consulta sobre nota Parcial 1</td>
-                    <td className="py-3 px-3 text-slate-400">Hace 2 días</td>
-                    <td className="py-3 px-3">
-                      <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-md font-semibold text-[10px]">
-                        Respondido
                       </span>
                     </td>
                     <td className="py-3 px-3 text-right">
@@ -273,7 +372,7 @@ export default function DocentesDashboard() {
 
         </div>
 
-        {/* COLUMNA DERECHA: Agenda del Día + Accesos Rápidos (4 columnas) */}
+        {/* Columna Derecha (4 columnas) */}
         <div className="lg:col-span-4 space-y-6">
           
           {/* Agenda del Día */}
@@ -287,7 +386,6 @@ export default function DocentesDashboard() {
             </div>
 
             <div className="space-y-4 pl-2 border-l-2 border-slate-800 relative">
-              
               <div className="relative pl-4 space-y-1">
                 <div className="absolute -left-[13px] top-1 w-2.5 h-2.5 rounded-full bg-blue-500 ring-4 ring-[#131927]"></div>
                 <span className="text-[10px] font-bold text-blue-400">10:00 AM - 11:30 AM</span>
@@ -298,17 +396,9 @@ export default function DocentesDashboard() {
               <div className="relative pl-4 space-y-1">
                 <div className="absolute -left-[13px] top-1 w-2.5 h-2.5 rounded-full bg-slate-600 ring-4 ring-[#131927]"></div>
                 <span className="text-[10px] font-bold text-slate-400">12:00 PM - 01:30 PM</span>
-                <h4 className="text-xs font-bold text-white">Técnicas de Pintura e Ilustración</h4>
+                <h4 className="text-xs font-bold text-white">Técnicas de Pintura</h4>
                 <p className="text-[11px] text-slate-400">Taller 3 • Grupo 2A</p>
               </div>
-
-              <div className="relative pl-4 space-y-1">
-                <div className="absolute -left-[13px] top-1 w-2.5 h-2.5 rounded-full bg-purple-500 ring-4 ring-[#131927]"></div>
-                <span className="text-[10px] font-bold text-purple-400">03:00 PM - 04:00 PM</span>
-                <h4 className="text-xs font-bold text-white">Reunión de Departamento Académico</h4>
-                <p className="text-[11px] text-slate-400">Sala de Juntas B • Presencial</p>
-              </div>
-
             </div>
 
             <button className="w-full py-2 bg-[#0B0F17] hover:bg-slate-800 border border-slate-800 rounded-xl text-xs font-semibold text-slate-300 transition-colors">
@@ -316,7 +406,7 @@ export default function DocentesDashboard() {
             </button>
           </div>
 
-          {/* Accesos Rápidos de Gestión Docente */}
+          {/* Accesos Rápidos */}
           <div className="bg-[#131927] border border-slate-800/80 rounded-2xl p-5 space-y-3">
             <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
               Accesos Rápidos
