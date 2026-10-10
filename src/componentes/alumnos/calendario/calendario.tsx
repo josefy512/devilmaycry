@@ -13,6 +13,7 @@ import {
   AlertCircle,
   BookOpen,
   CheckCircle2
+  Upload
 } from 'lucide-react';
 
 export default function CalendarioView() {
