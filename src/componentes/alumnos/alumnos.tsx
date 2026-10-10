@@ -1,4 +1,5 @@
 import TareasProyectos from './tareas_y_proyectos/tareas_y_proyectos';
+import RecursosDeEstudioView from "./recursos_de_estudio/recursos_de_estudio";
 import BolsaDeTrabajoView from './bolsa_de_trabajo/bolsa_de_trabajo';
 import DocumentosView from "./documentos/documentos";
 import DirectorioView from './directorio/directorio';
@@ -185,7 +186,7 @@ const renderView = () => {
       case 'tareas':
         return <TareasProyectos />;
       case 'recursos':
-        return <PlaceholderView title="Recursos de Estudio y Biblioteca" />;
+        return <RecursosDeEstudioView />;
       case 'foros':
         return <PlaceholderView title="Foros de Discusión Estudiantil" />;
       case 'directorio':
