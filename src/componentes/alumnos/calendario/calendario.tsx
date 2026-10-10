@@ -12,7 +12,7 @@ import {
   Video, 
   AlertCircle,
   BookOpen,
-  CheckCircle2
+  CheckCircle2,
   Upload
 } from 'lucide-react';
 
