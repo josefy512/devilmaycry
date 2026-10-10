@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import CalificacionesPanel from './calificaciones/calificaciones';
+
 import { 
   LayoutDashboard, 
   CheckSquare, 
@@ -23,7 +25,6 @@ import {
   Menu, 
   X 
 } from 'lucide-react';
-import CalificacionesPanel from './calificaciones';
 
 type DocenteSectionId = 'panel' | 'calificaciones' | 'asistencias' | 'horarios' | 'cursos' | 'configuracion';
 
