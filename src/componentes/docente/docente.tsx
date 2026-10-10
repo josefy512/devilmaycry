@@ -1,188 +1,354 @@
-import { useState } from 'react';
-import {
-  ClipboardList,
-  Table,
-  CheckSquare,
-  FileWarning,
-  UserX,
-  GraduationCap,
-  Wifi,
-  WifiOff,
-  Menu,
+import React, { useState } from 'react';
+import { 
+  Search, 
+  Bell, 
+  CheckSquare, 
+  Users, 
+  Clock, 
+  Calendar, 
+  FileText, 
+  BookOpen, 
+  AlertCircle, 
+  TrendingUp, 
+  ClipboardList, 
+  Plus, 
+  MessageSquare, 
+  HelpCircle, 
+  Eye, 
+  Award, 
+  Send, 
+  Upload, 
+  ChevronRight, 
+  Menu, 
   X,
-  CircleDot,
+  FileCheck2,
+  ShieldAlert
 } from 'lucide-react';
 
-// Vistas simuladas temporales para evitar que la app explote
-const MisCursosView = () => <div className="p-4 bg-white rounded-xl shadow-sm">Gestión de Cursos y Asignaturas</div>;
-const RegistroNotasView = () => <div className="p-4 bg-white rounded-xl shadow-sm">Módulo de Registro de Notas</div>;
-const AsistenciaView = () => <div className="p-4 bg-white rounded-xl shadow-sm">Control e Historial de Asistencia</div>;
-const FutsView = () => <div className="p-4 bg-white rounded-xl shadow-sm">Atención y Gestión de FUTs</div>;
-const DesercionView = () => <div className="p-4 bg-white rounded-xl shadow-sm">Alertas Tempranas de Deserción</div>;
-
-type SectionId = 'cursos' | 'notas' | 'asistencia' | 'futs' | 'desercion';
-
-type Section = {
-  id: SectionId;
-  label: string;
-  icon: React.ReactNode;
-};
-
-const sections: Section[] = [
-  { id: 'cursos', label: 'Mis Cursos', icon: <ClipboardList className="h-5 w-5" /> },
-  { id: 'notas', label: 'Registro de Notas', icon: <Table className="h-5 w-5" /> },
-  { id: 'asistencia', label: 'Control de Asistencia', icon: <CheckSquare className="h-5 w-5" /> },
-  { id: 'futs', label: 'Atención de FUTs', icon: <FileWarning className="h-5 w-5" /> },
-  { id: 'desercion', label: 'Alertas de Deserción', icon: <UserX className="h-5 w-5" /> },
-];
-
-export default function DocenteDashboard() {
-  const [active, setActive] = useState<SectionId>('cursos');
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [isOnline] = useState(navigator.onLine);
-
-  const activeLabel = sections.find((s) => s.id === active)?.label ?? '';
-
-  const renderView = () => {
-    switch (active) {
-      case 'cursos': return <MisCursosView />;
-      case 'notas': return <RegistroNotasView />;
-      case 'asistencia': return <AsistenciaView />;
-      case 'futs': return <FutsView />;
-      case 'desercion': return <DesercionView />;
-    }
-  };
-
-  const handleSelect = (id: SectionId) => {
-    setActive(id);
-    setMobileOpen(false);
-  };
+export default function DocentesDashboard() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen w-full bg-slate-50">
-      {/* ===== Sidebar ===== */}
-      <aside
-        className={`${
-          mobileOpen ? 'fixed inset-0 z-50 block' : 'hidden'
-        } md:relative md:block md:w-[40%] md:flex-shrink-0`}
-      >
-        {mobileOpen && (
-          <div
-            className="absolute inset-0 bg-black/50 md:hidden"
-            onClick={() => setMobileOpen(false)}
-          />
-        )}
-
-        <div className="relative flex h-full min-h-screen flex-col bg-[#0a1f44]">
-          <button
-            onClick={() => setMobileOpen(false)}
-            className="absolute right-4 top-4 z-10 rounded-lg bg-white/10 p-2 text-white md:hidden"
-          >
-            <X className="h-5 w-5" />
-          </button>
-
-          <div className="border-b border-white/10 px-6 py-7">
-            <div className="flex items-center gap-3">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/20">
-                <GraduationCap className="h-7 w-7 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="truncate text-lg font-semibold text-white">Ing. Carlos Mendoza</h2>
-                <p className="truncate text-sm text-blue-200/70">Sistemas e Informática</p>
-              </div>
-            </div>
-
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-200 ring-1 ring-emerald-400/30">
-                <CircleDot className="h-3 w-3" />
-                Docente Activo
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500/15 px-3 py-1 text-xs font-medium text-sky-200 ring-1 ring-sky-400/30">
-                {isOnline ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
-                PWA Sincronizado
-              </span>
-            </div>
-          </div>
-
-          <nav className="flex-1 overflow-y-auto px-3 py-4">
-            <ul className="space-y-1">
-              {sections.map((s) => {
-                const isActive = active === s.id;
-                return (
-                  <li key={s.id}>
-                    <button
-                      onClick={() => handleSelect(s.id)}
-                      className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
-                        isActive
-                          ? 'bg-white/15 text-white shadow-md shadow-blue-900/30 ring-1 ring-white/20'
-                          : 'text-blue-200/70 hover:bg-white/5 hover:text-white'
-                      }`}
-                    >
-                      <span className={isActive ? 'text-sky-300' : ''}>{s.icon}</span>
-                      <span className="flex-1 text-left">{s.label}</span>
-                      {isActive && <span className="h-1.5 w-1.5 rounded-full bg-sky-300" />}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
-
-          <div className="border-t border-white/10 px-6 py-4">
-            <p className="text-xs text-blue-200/40">Progresa PWA · Panel Docente v1.0</p>
-          </div>
-        </div>
-      </aside>
-
-      {/* ===== Main Content ===== */}
-      <main className="flex min-h-screen flex-1 flex-col md:w-[60%]">
-        <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 md:hidden">
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700"
-          >
-            <Menu className="h-4 w-4" />
-            Menú
-          </button>
-          <span className="text-sm font-semibold text-slate-800">{activeLabel}</span>
-        </div>
-
-        <div className="no-scrollbar flex gap-2 overflow-x-auto border-b border-slate-200 bg-white px-4 py-2 md:hidden">
-          {sections.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setActive(s.id)}
-              className={`flex flex-shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                active === s.id
-                  ? 'bg-[#0a1f44] text-white'
-                  : 'bg-slate-100 text-slate-600'
-              }`}
-            >
-              {s.icon}
-              {s.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="hidden items-center justify-between border-b border-slate-200 bg-white px-8 py-5 md:flex">
+    <div className="min-h-screen bg-[#0B0F17] text-slate-100 p-4 sm:p-6 space-y-6 font-sans">
+      
+      {/* 1. Header Superior Responsivo */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div className="flex items-center justify-between w-full md:w-auto">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">{activeLabel}</h1>
-            <p className="mt-0.5 text-sm text-slate-500">
-              Semestre 2026-I · Sistemas e Informática
-            </p>
+            <span className="text-xs text-slate-400 font-medium">Docente / Panel de Control</span>
+            <h1 className="text-xl font-bold text-white tracking-tight">Resumen del Día</h1>
           </div>
-          <div className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium ${
-            isOnline ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
-          }`}>
-            {isOnline ? <Wifi className="h-3.5 w-3.5" /> : <WifiOff className="h-3.5 w-3.5" />}
-            {isOnline ? 'En línea' : 'Modo Offline'}
-          </div>
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 text-slate-400 hover:text-white bg-[#131927] rounded-lg border border-slate-800"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
-          {renderView()}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+          <div className="relative flex-1 sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <input 
+              type="text" 
+              placeholder="Buscar estudiante, curso, FUT... (Ctrl+K)" 
+              className="w-full bg-[#131927] border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-3">
+            <button className="p-2.5 bg-[#131927] border border-slate-800 rounded-xl text-slate-400 hover:text-white transition-colors relative">
+              <Bell className="w-4 h-4" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
+            </button>
+
+            <div className="flex items-center gap-3 pl-3 border-l border-slate-800">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-xs text-white shadow-md shadow-blue-500/10">
+                MR
+              </div>
+              <div className="hidden sm:block text-left">
+                <p className="font-semibold text-xs text-slate-200">Marta Rodríguez</p>
+                <p className="text-[10px] text-slate-400 font-medium">Gestión Académica</p>
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
+      </div>
+
+      {/* 2. Tarjetas de Indicadores Rápidos (KPIs) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        {/* KPI 1: Tareas por calificar */}
+        <div className="bg-[#131927] border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400">Tareas por calificar</span>
+            <div className="p-2 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20">
+              <AlertCircle className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-2xl font-extrabold text-white">14</span>
+            <span className="text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md">
+              +3 desde ayer
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-500 mt-2">Pendientes de revisión en 2 cursos</p>
+        </div>
+
+        {/* KPI 2: Asistencia Promedio */}
+        <div className="bg-[#131927] border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400">Asistencia Promedio</span>
+            <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
+              <Users className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-2xl font-extrabold text-white">92%</span>
+            <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md flex items-center gap-0.5">
+              <TrendingUp className="w-3 h-3" /> +1.2%
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-500 mt-2">Promedio semanal consolidado</p>
+        </div>
+
+        {/* KPI 3: Próxima Evaluación */}
+        <div className="bg-[#131927] border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400">Próxima Evaluación</span>
+            <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20">
+              <Calendar className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <span className="text-xl font-bold text-white">Mañana</span>
+            <p className="text-xs text-blue-400 font-medium truncate mt-0.5">Historia del Arte • Grupo 4B</p>
+          </div>
+          <p className="text-[11px] text-slate-500 mt-2">Examen Parcial Ponderado (25%)</p>
+        </div>
+
+        {/* KPI 4: Tutorías de Hoy */}
+        <div className="bg-[#131927] border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400">Tutorías Hoy</span>
+            <div className="p-2 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20">
+              <MessageSquare className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-center justify-between">
+            <span className="text-2xl font-extrabold text-white">3</span>
+            <div className="flex -space-x-2 overflow-hidden">
+              <div className="inline-block h-6 w-6 rounded-full ring-2 ring-[#131927] bg-slate-700 text-[10px] font-bold text-center leading-6 text-white">AG</div>
+              <div className="inline-block h-6 w-6 rounded-full ring-2 ring-[#131927] bg-blue-600 text-[10px] font-bold text-center leading-6 text-white">CR</div>
+              <div className="inline-block h-6 w-6 rounded-full ring-2 ring-[#131927] bg-indigo-600 text-[10px] font-bold text-center leading-6 text-white">ED</div>
+            </div>
+          </div>
+          <p className="text-[11px] text-slate-500 mt-2">Sesiones de reforzamiento agendadas</p>
+        </div>
+
+      </div>
+
+      {/* 3. Bloque Central: Clase Actual + Panel de Control */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* COLUMNA IZQUIERDA: Clase en curso y Tablas de Actividad/FUTs (8 columnas) */}
+        <div className="lg:col-span-8 space-y-6">
+          
+          {/* Tarjeta de Clase Próxima / En Vivo */}
+          <div className="bg-gradient-to-r from-[#131927] via-[#162035] to-[#131927] border border-blue-500/30 rounded-2xl p-5 relative overflow-hidden shadow-xl shadow-blue-950/20">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold rounded-full flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    En 15 minutos
+                  </span>
+                  <span className="text-slate-400 font-medium">Aula 102 • Pabellón B</span>
+                </div>
+                <h2 className="text-xl font-bold text-white tracking-tight">Historia del Arte Moderno</h2>
+                <p className="text-xs text-slate-400">Grupo 4B • Unidad 3: Impresionismo y Vanguardias</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button className="flex-1 sm:flex-none px-4 py-2.5 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 rounded-xl text-xs font-semibold text-slate-200 transition-colors flex items-center justify-center gap-2">
+                  <BookOpen className="w-4 h-4 text-slate-400" />
+                  <span>Ver Sílabo</span>
+                </button>
+                <button className="flex-1 sm:flex-none px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
+                  <CheckSquare className="w-4 h-4" />
+                  <span>Pasar Lista</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabla de Solicitudes, Justificaciones y FUTs Estudiantiles */}
+          <div className="bg-[#131927] border border-slate-800/80 rounded-2xl p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <FileCheck2 className="w-4 h-4 text-blue-400" />
+                  <span>Atención de FUTs y Justificaciones Médicas</span>
+                </h3>
+                <p className="text-xs text-slate-400">Trámites y peticiones académicas ingresadas por tus estudiantes</p>
+              </div>
+              <button className="text-xs text-blue-400 font-semibold hover:underline self-start sm:self-auto flex items-center gap-1">
+                <span>Ver todas las solicitudes</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-slate-300">
+                <thead className="bg-[#0B0F17] text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                  <tr>
+                    <th className="py-2.5 px-3">Estudiante</th>
+                    <th className="py-2.5 px-3">Trámite / Asunto</th>
+                    <th className="py-2.5 px-3">Fecha</th>
+                    <th className="py-2.5 px-3">Estado</th>
+                    <th className="py-2.5 px-3 text-right">Acción</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  <tr className="hover:bg-slate-800/30 transition-colors">
+                    <td className="py-3 px-3 font-medium text-white flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold">AG</div>
+                      <span>Ana García</span>
+                    </td>
+                    <td className="py-3 px-3">Entrega de Proyecto Final (Prorroga)</td>
+                    <td className="py-3 px-3 text-slate-400">Hoy, 9:00 AM</td>
+                    <td className="py-3 px-3">
+                      <span className="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-md font-semibold text-[10px]">
+                        Pendiente FUT #4092
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      <button className="p-1.5 bg-[#0B0F17] hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors border border-slate-800">
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
+                    </td>
+                  </tr>
+
+                  <tr className="hover:bg-slate-800/30 transition-colors">
+                    <td className="py-3 px-3 font-medium text-white flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold">CR</div>
+                      <span>Carlos Ruiz</span>
+                    </td>
+                    <td className="py-3 px-3">Justificante Médico (FUT de Salud)</td>
+                    <td className="py-3 px-3 text-slate-400">Ayer</td>
+                    <td className="py-3 px-3">
+                      <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-md font-semibold text-[10px]">
+                        Aprobado
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      <button className="p-1.5 bg-[#0B0F17] hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors border border-slate-800">
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
+                    </td>
+                  </tr>
+
+                  <tr className="hover:bg-slate-800/30 transition-colors">
+                    <td className="py-3 px-3 font-medium text-white flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-[10px] font-bold">ED</div>
+                      <span>Elena Díaz</span>
+                    </td>
+                    <td className="py-3 px-3">Consulta sobre nota Parcial 1</td>
+                    <td className="py-3 px-3 text-slate-400">Hace 2 días</td>
+                    <td className="py-3 px-3">
+                      <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-md font-semibold text-[10px]">
+                        Respondido
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      <button className="p-1.5 bg-[#0B0F17] hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors border border-slate-800">
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        {/* COLUMNA DERECHA: Agenda del Día + Accesos Rápidos (4 columnas) */}
+        <div className="lg:col-span-4 space-y-6">
+          
+          {/* Agenda del Día */}
+          <div className="bg-[#131927] border border-slate-800/80 rounded-2xl p-5 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                <Clock className="w-4 h-4 text-blue-400" />
+                <span>Agenda de Hoy</span>
+              </h3>
+              <span className="text-[10px] font-mono text-slate-500">10 OCT 2026</span>
+            </div>
+
+            <div className="space-y-4 pl-2 border-l-2 border-slate-800 relative">
+              
+              <div className="relative pl-4 space-y-1">
+                <div className="absolute -left-[13px] top-1 w-2.5 h-2.5 rounded-full bg-blue-500 ring-4 ring-[#131927]"></div>
+                <span className="text-[10px] font-bold text-blue-400">10:00 AM - 11:30 AM</span>
+                <h4 className="text-xs font-bold text-white">Historia del Arte Moderno</h4>
+                <p className="text-[11px] text-slate-400">Aula 102 • Grupo 4B</p>
+              </div>
+
+              <div className="relative pl-4 space-y-1">
+                <div className="absolute -left-[13px] top-1 w-2.5 h-2.5 rounded-full bg-slate-600 ring-4 ring-[#131927]"></div>
+                <span className="text-[10px] font-bold text-slate-400">12:00 PM - 01:30 PM</span>
+                <h4 className="text-xs font-bold text-white">Técnicas de Pintura e Ilustración</h4>
+                <p className="text-[11px] text-slate-400">Taller 3 • Grupo 2A</p>
+              </div>
+
+              <div className="relative pl-4 space-y-1">
+                <div className="absolute -left-[13px] top-1 w-2.5 h-2.5 rounded-full bg-purple-500 ring-4 ring-[#131927]"></div>
+                <span className="text-[10px] font-bold text-purple-400">03:00 PM - 04:00 PM</span>
+                <h4 className="text-xs font-bold text-white">Reunión de Departamento Académico</h4>
+                <p className="text-[11px] text-slate-400">Sala de Juntas B • Presencial</p>
+              </div>
+
+            </div>
+
+            <button className="w-full py-2 bg-[#0B0F17] hover:bg-slate-800 border border-slate-800 rounded-xl text-xs font-semibold text-slate-300 transition-colors">
+              Ver horario completo
+            </button>
+          </div>
+
+          {/* Accesos Rápidos de Gestión Docente */}
+          <div className="bg-[#131927] border border-slate-800/80 rounded-2xl p-5 space-y-3">
+            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+              Accesos Rápidos
+            </h3>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button className="p-3 bg-[#0B0F17] hover:bg-slate-800/80 border border-slate-800/80 rounded-xl flex flex-col items-center justify-center gap-2 group transition-all">
+                <Upload className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" />
+                <span className="text-[11px] font-semibold text-slate-300">Subir Material</span>
+              </button>
+
+              <button className="p-3 bg-[#0B0F17] hover:bg-slate-800/80 border border-slate-800/80 rounded-xl flex flex-col items-center justify-center gap-2 group transition-all">
+                <Send className="w-5 h-5 text-emerald-400 group-hover:scale-110 transition-transform" />
+                <span className="text-[11px] font-semibold text-slate-300">Enviar Anuncio</span>
+              </button>
+
+              <button className="p-3 bg-[#0B0F17] hover:bg-slate-800/80 border border-slate-800/80 rounded-xl flex flex-col items-center justify-center gap-2 group transition-all">
+                <Award className="w-5 h-5 text-purple-400 group-hover:scale-110 transition-transform" />
+                <span className="text-[11px] font-semibold text-slate-300">Firmar Actas</span>
+              </button>
+
+              <button className="p-3 bg-[#0B0F17] hover:bg-slate-800/80 border border-slate-800/80 rounded-xl flex flex-col items-center justify-center gap-2 group transition-all">
+                <HelpCircle className="w-5 h-5 text-amber-400 group-hover:scale-110 transition-transform" />
+                <span className="text-[11px] font-semibold text-slate-300">Soporte</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
   );
 }
