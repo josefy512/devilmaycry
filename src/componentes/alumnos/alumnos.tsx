@@ -1,6 +1,7 @@
 import TareasProyectos from './tareas_y_proyectos/tareas_y_proyectos';
 import RecursosDeEstudioView from "./recursos_de_estudio/recursos_de_estudio";
 import BolsaDeTrabajoView from './bolsa_de_trabajo/bolsa_de_trabajo';
+import CalendarioView from './calendario/calendario';
 import DocumentosView from "./documentos/documentos";
 import DirectorioView from './directorio/directorio';
 import { useState } from "react";
@@ -182,7 +183,7 @@ const renderView = () => {
       case 'panel':
         return <PanelControlView />;
       case 'calendario':
-        return <PlaceholderView title="Calendario Académico" />;
+        return <CalendarioView />;
       case 'tareas':
         return <TareasProyectos />;
       case 'recursos':
