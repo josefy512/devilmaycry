@@ -18,12 +18,13 @@ import {
   FlaskConical, 
   CheckCircle2,
   Menu,
-  X
+  X,
+  Download
 } from 'lucide-react';
 
 export default function DireccionLayout() {
   const [activeSection, setActiveSection] = useState('panel');
-  const [facultadFiltro, setFacultadFiltro] = useState('Todas');
+  const [facultadFiltro, setFacultadFiltro] = useState('Vista General del Campus');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Opciones del menú lateral de Dirección
@@ -45,20 +46,20 @@ export default function DireccionLayout() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       
       {/* 1. HEADER GLOBAL SUPERIOR */}
-      <header className="h-16 border-b border-slate-800 bg-[#131927] px-4 lg:px-6 flex items-center justify-between sticky top-0 z-40">
+      <header className="h-16 border-b border-slate-800/80 bg-[#131927] px-4 lg:px-8 flex items-center justify-between sticky top-0 z-40 backdrop-blur-md">
         <div className="flex items-center gap-4">
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="lg:hidden p-2 text-slate-400 hover:text-white rounded-lg bg-[#0B0F17] border border-slate-800"
+            className="lg:hidden p-2 text-slate-400 hover:text-white rounded-xl bg-[#0B0F17] border border-slate-800 transition-colors"
           >
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center font-black text-white text-lg shadow-md shadow-blue-600/30">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 to-blue-500 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-blue-600/20">
               E
             </div>
             <div>
@@ -68,25 +69,27 @@ export default function DireccionLayout() {
           </div>
         </div>
 
-        {/* Buscador Global y Perfil del Rector/Director */}
+        {/* Info Campus & Perfil del Rector */}
         <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-[#0B0F17] border border-slate-800 rounded-xl text-xs text-slate-300">
+          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-[#0B0F17] border border-slate-800/80 rounded-xl text-xs text-slate-300">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span>Universidad Central • Sede Central</span>
           </div>
 
-          <button className="p-2 text-slate-400 hover:text-white relative bg-[#0B0F17] border border-slate-800 rounded-xl">
+          <button className="p-2 text-slate-400 hover:text-white relative bg-[#0B0F17] border border-slate-800/80 rounded-xl transition-colors">
             <Bell className="w-4 h-4" />
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-blue-500"></span>
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-500"></span>
           </button>
 
-          <div className="flex items-center gap-2.5 pl-2 border-l border-slate-800">
-            <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center font-bold text-xs text-blue-300">
-              RV
+          <div className="flex items-center gap-2.5 pl-2 border-l border-slate-800/80">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 p-0.5 shadow-md shadow-blue-500/10">
+              <div className="w-full h-full bg-[#0B0F17] rounded-full flex items-center justify-center font-bold text-xs text-blue-300">
+                RV
+              </div>
             </div>
             <div className="hidden sm:block text-left">
               <p className="text-xs font-bold text-white leading-none">Dr. Ricardo Valdivia</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">RECTORADO INSTITUCIONAL</p>
+              <p className="text-[10px] text-slate-400 mt-0.5 font-mono">RECTORADO INSTITUCIONAL</p>
             </div>
           </div>
         </div>
@@ -95,16 +98,16 @@ export default function DireccionLayout() {
       {/* CONTENEDOR PRINCIPAL: SIDEBAR + CONTENIDO */}
       <div className="flex-1 flex overflow-hidden">
         
-        {/* 2. SIDEBAR IZQUIERDO DE COMANDO EJECUTIVO */}
+        {/* 2. SIDEBAR IZQUIERDO */}
         <aside className={`
           fixed lg:static inset-y-16 left-0 z-30
-          w-64 bg-[#131927] border-r border-slate-800 flex flex-col justify-between p-4
+          w-64 bg-[#131927] border-r border-slate-800/80 flex flex-col justify-between p-4
           transition-transform duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
           <div className="space-y-6">
             <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 mb-2">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 mb-2.5">
                 COMANDO EJECUTIVO
               </p>
               <nav className="space-y-1">
@@ -133,92 +136,105 @@ export default function DireccionLayout() {
             </div>
           </div>
 
-          <div className="space-y-2 pt-4 border-t border-slate-800/80">
+          <div className="space-y-1 pt-4 border-t border-slate-800/80">
             <button className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-400 hover:text-white rounded-xl transition-colors">
               <Settings className="w-4 h-4" />
               <span>Configuración</span>
             </button>
-            <button className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-red-400 hover:text-red-300 rounded-xl transition-colors">
+            <button className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-rose-400 hover:text-rose-300 rounded-xl transition-colors">
               <LogOut className="w-4 h-4" />
               <span>Cerrar Sesión</span>
             </button>
           </div>
         </aside>
 
-        {/* 3. VISTA PRINCIPAL DEL PANEL DE DIRECCIÓN */}
+        {/* 3. VISTA PRINCIPAL DEL PANEL */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto">
           {activeSection === 'panel' && (
-            <div className="space-y-6">
+            <div className="space-y-6 max-w-7xl mx-auto">
               
-              {/* Header Interno del Panel */}
-              <div className="bg-[#131927] border border-slate-800 rounded-2xl p-5 space-y-4">
+              {/* HEADER INTERNO REFINADO Y ESTILIZADO */}
+              <div className="bg-[#131927] border border-slate-800/80 rounded-2xl p-5 sm:p-6 space-y-5 shadow-lg shadow-black/20">
+                
+                {/* Fila Superior: Título + Acciones Principales */}
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                   <div className="space-y-1">
-                    <div className="flex flex-wrap items-center gap-2 text-xs">
-                      <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 font-bold border border-blue-500/20 rounded uppercase text-[10px]">
-                        GOBIERNO UNIVERSITARIO & DIRECCIÓN ACADÉMICA
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 bg-blue-500/10 text-blue-400 font-bold border border-blue-500/20 rounded-md uppercase text-[10px] tracking-wide">
+                        DIRECCIÓN ACADÉMICA
                       </span>
-                      <span className="text-slate-500">•</span>
-                      <span className="text-slate-400 font-mono text-[11px]">CICLO ESTRATÉGICO 2026-II</span>
+                      <span className="text-slate-600">•</span>
+                      <span className="text-slate-400 font-mono text-[11px]">CICLO 2026-II</span>
                     </div>
                     <h1 className="text-2xl font-extrabold text-white tracking-tight">
                       Panel de Control Estratégico
                     </h1>
                     <p className="text-xs text-slate-400">
-                      Rectorado / Decanatura General • Supervisión de calidad académica, gestión de cátedras y balance presupuestal.
+                      Supervisión de calidad académica, gestión de cátedras y balance presupuestal.
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="px-3 py-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-bold rounded-xl flex items-center gap-1.5">
+                  {/* Botones de Acción Agrupados y Pulcros */}
+                  <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-center">
+                    <span className="px-3 py-2 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-bold rounded-xl flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                      2 ALERTAS INSTITUCIONALES
+                      2 Alertas Activas
                     </span>
+
                     <button className="px-3.5 py-2 bg-[#0B0F17] hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl text-xs font-semibold transition-colors flex items-center gap-2">
-                      <FileText className="w-3.5 h-3.5 text-blue-400" />
-                      <span>Informe Consolidado (.PDF)</span>
+                      <Download className="w-3.5 h-3.5 text-blue-400" />
+                      <span>Informe (.PDF)</span>
                     </button>
+
                     <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-600/20 flex items-center gap-2">
                       <Sparkles className="w-3.5 h-3.5" />
-                      <span>Nueva Resolución Decanal</span>
+                      <span>Nueva Resolución</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Buscador y Filtros */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-800/80">
-                  <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 scrollbar-none">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase mr-1 shrink-0">Ámbito:</span>
-                    {facultades.map((f, i) => (
-                      <button
-                        key={f}
-                        onClick={() => setFacultadFiltro(f)}
-                        className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
-                          (facultadFiltro === f || (i === 0 && facultadFiltro === 'Todas'))
-                            ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30'
-                            : 'bg-[#0B0F17] text-slate-400 border border-slate-800 hover:text-slate-200'
-                        }`}
-                      >
-                        {f}
-                      </button>
-                    ))}
+                {/* Fila Inferior: Filtro de Ámbito + Buscador Integrado */}
+                <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 pt-4 border-t border-slate-800/80">
+                  
+                  {/* Selector Horizontal de Ámbito */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase mr-1 shrink-0">ÁMBITO:</span>
+                    {facultades.map((f) => {
+                      const esActivo = facultadFiltro === f;
+                      return (
+                        <button
+                          key={f}
+                          onClick={() => setFacultadFiltro(f)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+                            esActivo
+                              ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30'
+                              : 'bg-[#0B0F17] text-slate-400 border border-slate-800/80 hover:text-slate-200'
+                          }`}
+                        >
+                          {f}
+                        </button>
+                      );
+                    })}
                   </div>
 
-                  <div className="relative w-full sm:w-72 shrink-0">
+                  {/* Buscador Integrado */}
+                  <div className="relative w-full md:w-72 shrink-0">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
                     <input 
                       type="text" 
-                      placeholder="Buscar expedientes, resoluciones o actas..." 
-                      className="w-full bg-[#0B0F17] border border-slate-800 rounded-xl pl-8 pr-8 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
+                      placeholder="Buscar expedientes, actas..." 
+                      className="w-full bg-[#0B0F17] border border-slate-800/80 rounded-xl pl-8 pr-8 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
                     />
                     <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 font-mono border border-slate-800 px-1 py-0.5 rounded">
                       ⌘K
                     </span>
                   </div>
+
                 </div>
+
               </div>
 
-              {/* Tarjetas de Alertas Críticas */}
+              {/* TARJETAS DE ALERTAS CRÍTICAS */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-[#131927] border border-amber-500/30 rounded-2xl p-4 space-y-3">
                   <div className="flex items-start gap-3">
@@ -231,7 +247,7 @@ export default function DireccionLayout() {
                       </span>
                       <h3 className="text-sm font-bold text-white mt-1">Presupuesto de Facultad al 94.6% de ejecución</h3>
                       <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
-                        Umbral trimestral alcanzado con 18 días de anticipación. Requiere reasignación del Fondo de Contingencia para prácticas clínicas.
+                        Umbral trimestral alcanzado con 18 días de anticipación. Requiere reasignación del Fondo de Contingencia.
                       </p>
                     </div>
                   </div>
@@ -255,7 +271,7 @@ export default function DireccionLayout() {
                       </span>
                       <h3 className="text-sm font-bold text-white mt-1">Evaluaciones Docentes del Semestre: 12 cátedras pendientes</h3>
                       <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
-                        Cierre de auditoría para las Facultades de Ingeniería y Humanidades. Garantiza la emisión de actas de grado académico.
+                        Cierre de auditoría para las Facultades de Ingeniería y Humanidades. Garantiza la emisión de actas de grado.
                       </p>
                     </div>
                   </div>
@@ -269,7 +285,7 @@ export default function DireccionLayout() {
                 </div>
               </div>
 
-              {/* KPIs Principales */}
+              {/* KPIS PRINCIPALES */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-[#131927] border border-slate-800 rounded-2xl p-4 space-y-3">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Asistencia General</span>
@@ -320,10 +336,10 @@ export default function DireccionLayout() {
                 </div>
               </div>
 
-              {/* Gráfico y Asistente */}
+              {/* GRÁFICO Y ASISTENTE IA */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
-                {/* Gráfico de Tendencia (8 cols) */}
+                {/* Gráfico de Tendencia */}
                 <div className="lg:col-span-8 bg-[#131927] border border-slate-800 rounded-2xl p-5 space-y-4">
                   <div className="flex justify-between items-center border-b border-slate-800 pb-3">
                     <h3 className="text-sm font-bold text-white">Evolución de Rendimiento y Promedios por Carrera</h3>
@@ -363,7 +379,7 @@ export default function DireccionLayout() {
                   </div>
                 </div>
 
-                {/* Asistente IA (4 cols) */}
+                {/* Asistente IA */}
                 <div className="lg:col-span-4 bg-[#131927] border border-blue-500/40 rounded-2xl p-5 space-y-4">
                   <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                     <h3 className="text-xs font-bold text-white uppercase">Asistente Estratégico Decanal</h3>
@@ -388,7 +404,7 @@ export default function DireccionLayout() {
           )}
 
           {activeSection !== 'panel' && (
-            <div className="p-12 text-center bg-[#131927] border border-slate-800 rounded-2xl">
+            <div className="p-12 text-center bg-[#131927] border border-slate-800 rounded-2xl max-w-7xl mx-auto">
               <h2 className="text-xl font-bold text-white">Sección {activeSection.toUpperCase()} en Desarrollo</h2>
               <p className="text-xs text-slate-400 mt-1">Conectando base de datos institucional multi-tenant...</p>
             </div>
