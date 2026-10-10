@@ -49,7 +49,7 @@ export default function DireccionLayout() {
     <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       
       {/* 1. HEADER GLOBAL SUPERIOR */}
-      <header className="h-16 border-b border-slate-800/80 bg-[#131927] px-4 lg:px-8 flex items-center justify-between sticky top-0 z-40 backdrop-blur-md">
+      <header className="h-16 border-b border-slate-800/80 bg-[#131927] px-4 lg:px-8 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-4">
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -153,85 +153,72 @@ export default function DireccionLayout() {
           {activeSection === 'panel' && (
             <div className="space-y-6 max-w-7xl mx-auto">
               
-              {/* HEADER INTERNO REFINADO Y ESTILIZADO */}
-              <div className="bg-[#131927] border border-slate-800/80 rounded-2xl p-5 sm:p-6 space-y-5 shadow-lg shadow-black/20">
-                
-                {/* Fila Superior: Título + Acciones Principales */}
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-0.5 bg-blue-500/10 text-blue-400 font-bold border border-blue-500/20 rounded-md uppercase text-[10px] tracking-wide">
-                        DIRECCIÓN ACADÉMICA
-                      </span>
-                      <span className="text-slate-600">•</span>
-                      <span className="text-slate-400 font-mono text-[11px]">CICLO 2026-II</span>
-                    </div>
-                    <h1 className="text-2xl font-extrabold text-white tracking-tight">
-                      Panel de Control Estratégico
-                    </h1>
-                    <p className="text-xs text-slate-400">
-                      Supervisión de calidad académica, gestión de cátedras y balance presupuestal.
-                    </p>
-                  </div>
-
-                  {/* Botones de Acción Agrupados y Pulcros */}
-                  <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-center">
-                    <span className="px-3 py-2 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-bold rounded-xl flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                      2 Alertas Activas
+              {/* HEADER ULTRA LIMPIO Y ELEGANTE (SIN CAJA TOSCA) */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-extrabold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20 tracking-wider uppercase">
+                      DIRECCIÓN ACADÉMICA
                     </span>
-
-                    <button className="px-3.5 py-2 bg-[#0B0F17] hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl text-xs font-semibold transition-colors flex items-center gap-2">
-                      <Download className="w-3.5 h-3.5 text-blue-400" />
-                      <span>Informe (.PDF)</span>
-                    </button>
-
-                    <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-600/20 flex items-center gap-2">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Nueva Resolución</span>
-                    </button>
+                    <span className="text-slate-600">•</span>
+                    <span className="text-xs font-mono text-slate-400">CICLO 2026-II</span>
                   </div>
+                  <h1 className="text-2xl font-extrabold text-white tracking-tight">
+                    Panel de Control Estratégico
+                  </h1>
+                  <p className="text-xs text-slate-400">
+                    Supervisión de calidad académica, gestión de cátedras y balance presupuestal.
+                  </p>
                 </div>
 
-                {/* Fila Inferior: Filtro de Ámbito + Buscador Integrado */}
-                <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 pt-4 border-t border-slate-800/80">
-                  
-                  {/* Selector Horizontal de Ámbito */}
-                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase mr-1 shrink-0">ÁMBITO:</span>
-                    {facultades.map((f) => {
-                      const esActivo = facultadFiltro === f;
-                      return (
-                        <button
-                          key={f}
-                          onClick={() => setFacultadFiltro(f)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
-                            esActivo
-                              ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30'
-                              : 'bg-[#0B0F17] text-slate-400 border border-slate-800/80 hover:text-slate-200'
-                          }`}
-                        >
-                          {f}
-                        </button>
-                      );
-                    })}
-                  </div>
+                {/* Botones de Acción directos y sin recargos */}
+                <div className="flex items-center gap-2.5">
+                  <button className="px-3.5 py-2 bg-[#131927] hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl text-xs font-semibold transition-colors flex items-center gap-2">
+                    <Download className="w-3.5 h-3.5 text-blue-400" />
+                    <span className="hidden sm:inline">Exportar Reporte</span>
+                  </button>
 
-                  {/* Buscador Integrado */}
-                  <div className="relative w-full md:w-72 shrink-0">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-                    <input 
-                      type="text" 
-                      placeholder="Buscar expedientes, actas..." 
-                      className="w-full bg-[#0B0F17] border border-slate-800/80 rounded-xl pl-8 pr-8 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
-                    />
-                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 font-mono border border-slate-800 px-1 py-0.5 rounded">
-                      ⌘K
-                    </span>
-                  </div>
+                  <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-600/20 flex items-center gap-2">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Nueva Resolución</span>
+                  </button>
+                </div>
+              </div>
 
+              {/* BARRA DE HERRAMIENTAS: FILTROS + BUSCADOR */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-2 bg-[#131927] border border-slate-800/80 rounded-2xl">
+                {/* Selector Horizontal de Ámbito */}
+                <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+                  {facultades.map((f) => {
+                    const esActivo = facultadFiltro === f;
+                    return (
+                      <button
+                        key={f}
+                        onClick={() => setFacultadFiltro(f)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+                          esActivo
+                            ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30'
+                            : 'text-slate-400 hover:text-slate-200 hover:bg-[#0B0F17]'
+                        }`}
+                      >
+                        {f}
+                      </button>
+                    );
+                  })}
                 </div>
 
+                {/* Buscador Integrado */}
+                <div className="relative w-full sm:w-64 shrink-0">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                  <input 
+                    type="text" 
+                    placeholder="Buscar expedientes..." 
+                    className="w-full bg-[#0B0F17] border border-slate-800/80 rounded-xl pl-8 pr-8 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
+                  />
+                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 font-mono border border-slate-800 px-1 py-0.5 rounded">
+                    ⌘K
+                  </span>
+                </div>
               </div>
 
               {/* TARJETAS DE ALERTAS CRÍTICAS */}
