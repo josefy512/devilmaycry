@@ -23,6 +23,7 @@ import {
   Menu, 
   X 
 } from 'lucide-react';
+import CalificacionesPanel from './calificaciones';
 
 type DocenteSectionId = 'panel' | 'calificaciones' | 'asistencias' | 'horarios' | 'cursos' | 'configuracion';
 
@@ -150,7 +151,8 @@ export default function DocentesLayout() {
         {/* Contenido Dinámico de la Vista */}
         <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 overflow-y-auto">
           {activeSection === 'panel' && <PanelControlDocente />}
-          {activeSection !== 'panel' && (
+          {activeSection === 'calificaciones' && <CalificacionesPanel />}
+          {activeSection !== 'panel' && activeSection !== 'calificaciones' && (
             <div className="bg-[#131927] border border-slate-800 rounded-2xl p-8 text-center space-y-3">
               <h2 className="text-lg font-bold text-white capitalize">Módulo de {activeSection}</h2>
               <p className="text-xs text-slate-400">Esta sección se encuentra lista para su desarrollo.</p>
