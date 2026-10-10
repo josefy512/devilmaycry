@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import CalificacionesPanel from './calificaciones/calificaciones';
 import AsistenciasPanel from "./asistencias/asistencias";
+import HorariosPanel from "./horarios/horarios";
 
 import { 
   LayoutDashboard, 
@@ -155,6 +156,8 @@ export default function DocentesLayout() {
           {activeSection === 'panel' && <PanelControlDocente />}
           {activeSection === 'calificaciones' && <CalificacionesPanel />}
           {activeSection === 'asistencias' && <AsistenciasPanel />}
+          {activeSection === 'horarios' && <HorariosPanel />}
+
           
         </main>
 
