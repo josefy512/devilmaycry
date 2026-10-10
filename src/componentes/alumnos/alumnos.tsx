@@ -1,4 +1,5 @@
 import TareasProyectos from './tareas_y_proyectos/tareas_y_proyectos';
+import BolsaDeTrabajoView from './bolsa_de_trabajo/bolsa_de_trabajo';
 import DocumentosView from "./documentos/documentos";
 import DirectorioView from './directorio/directorio';
 import { useState } from "react";
