@@ -193,7 +193,7 @@ const renderView = () => {
       case 'progreso':
         return <PlaceholderView title="Mi Progreso Académico" />;
       case 'bolsa':
-        return <PlaceholderView title="Bolsa de Trabajo Institucional" />;
+        return <BolsaDeTrabajoView />;
       case 'documentos':
         return <DocumentosView />;
     }
