@@ -1,4 +1,5 @@
 import TareasProyectos from './tareas_y_proyectos/tareas_y_proyectos';
+import DocumentosView from "./documentos/documentos";
 import DirectorioView from './directorio/directorio';
 import { useState } from "react";
 import { 
@@ -193,7 +194,7 @@ const renderView = () => {
       case 'bolsa':
         return <PlaceholderView title="Bolsa de Trabajo Institucional" />;
       case 'documentos':
-        return <PlaceholderView title="Mis Documentos y Tramites" />;
+        return <DocumentosView />;
     }
   };
 
