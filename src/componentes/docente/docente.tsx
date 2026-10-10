@@ -155,12 +155,7 @@ export default function DocentesLayout() {
           {activeSection === 'panel' && <PanelControlDocente />}
           {activeSection === 'calificaciones' && <CalificacionesPanel />}
           {activeSection === 'asistencias' && <AsistenciasPanel />}
-          {activeSection !== 'panel' && activeSection !== 'calificaciones' && (
-            <div className="bg-[#131927] border border-slate-800 rounded-2xl p-8 text-center space-y-3">
-              <h2 className="text-lg font-bold text-white capitalize">Módulo de {activeSection}</h2>
-              <p className="text-xs text-slate-400">Esta sección se encuentra lista para su desarrollo.</p>
-            </div>
-          )}
+          
         </main>
 
       </div>
