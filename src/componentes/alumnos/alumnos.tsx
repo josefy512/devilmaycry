@@ -174,7 +174,14 @@ const PlaceholderView = ({ title }: { title: string }) => (
 );
 
 export default function EstudianteDashboard() {
-  const [active, setActive] = useState<SectionId>('panel');
+  const [active, setActive] = useState<SectionId>(() => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('progresa_student_section');
+    return (saved as SectionId) || 'panel';
+  }
+  return 'panel';
+});
+
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
   const [isOnline, setIsOnline] = useState<boolean>(
     typeof window !== 'undefined' ? navigator.onLine : true
