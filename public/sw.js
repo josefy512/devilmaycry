@@ -1,30 +1,58 @@
 // public/sw.js
-const CACHE_NAME = 'progresa-v1';
-const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/src/main.tsx',
-  '/src/App.tsx'
-];
+const CACHE_NAME = 'progresa-v2';
 
-// Instalación del Service Worker
+// 1. Instalación: Guardamos la base en caché
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      return cache.addAll(['/']);
     })
   );
   self.skipWaiting();
 });
 
-// Interceptar peticiones cuando no hay red
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      // Si está en caché lo devuelve, si no, intenta ir a la red
-      return cachedResponse || fetch(event.request).catch(() => {
-        return caches.match('/');
-      });
+// 2. Activación: Limpiamos cachés antiguas
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
     })
+  );
+  self.clients.claim();
+});
+
+// 3. Interceptar peticiones: Si no hay red, devolvemos la app desde la caché
+self.addEventListener('fetch', (event) => {
+  // Solo manejamos peticiones GET
+  if (event.request.method !== 'GET') return;
+
+  event.respondWith(
+    fetch(event.request)
+      .then((response) => {
+        // Si la red responde bien, clonamos la respuesta y la guardamos en caché dinámicamente
+        const responseClone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseClone);
+        });
+        return response;
+      })
+      .catch(() => {
+        // Si falla la red (offline), buscamos en la caché local
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          // Si es una navegación de página y no está en caché, devolvemos la raíz (index)
+          if (event.request.mode === 'navigate') {
+            return caches.match('/');
+          }
+        });
+      })
   );
 });
