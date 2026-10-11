@@ -1,24 +1,20 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
+import './index.css'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
     <App />
-  </StrictMode>,
+  </React.StrictMode>,
 )
 
-// Al final de src/main.tsx o dentro de App.tsx
-if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+// Registrar Service Worker para soporte offline completo en PC
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(
-      (registration) => {
-        console.log('Progresa PWA activo:', registration.scope);
-      },
-      (err) => {
-        console.log('Error PWA:', err);
-      }
-    );
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((reg) => console.log('Service Worker registrado correctamente:', reg.scope))
+      .catch((err) => console.error('Error al registrar el Service Worker:', err));
   });
 }
