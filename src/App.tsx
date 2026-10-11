@@ -1,5 +1,5 @@
-import DocenteDashboard from './componentes/docente/docente';
+import AlumnosDashboard from './componentes/alumnos/alumnos';
 
 export default function App() {
-  return < DocenteDashboard />;
+  return < AlumnosDashboard />;
 }
