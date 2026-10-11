@@ -4,7 +4,7 @@ import BolsaDeTrabajoView from './bolsa_de_trabajo/bolsa_de_trabajo';
 import CalendarioView from './calendario/calendario';
 import DocumentosView from "./documentos/documentos";
 import DirectorioView from './directorio/directorio';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   LayoutDashboard,
   Calendar,
@@ -176,7 +176,22 @@ const PlaceholderView = ({ title }: { title: string }) => (
 export default function EstudianteDashboard() {
   const [active, setActive] = useState<SectionId>('panel');
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
-  const [isOnline] = useState<boolean>(navigator.onLine);
+  const [isOnline, setIsOnline] = useState<boolean>(
+    typeof window !== 'undefined' ? navigator.onLine : true
+  );
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
 const renderView = () => {
     switch (active) {
@@ -297,13 +312,24 @@ return (
 
           <div className="flex items-center gap-3">
             <div
-              className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium ${
-                isOnline ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
-              }`}
-            >
-              {isOnline ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
-              <span>{isOnline ? 'En línea' : 'Offline'}</span>
-            </div>
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all duration-300 ${
+            isOnline
+             ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+            : 'bg-rose-500/10 text-rose-400 border-rose-500/20 animate-pulse'
+             }`}
+                  >
+                {isOnline ? (
+                       <>
+              <Wifi className="w-3.5 h-3.5 text-emerald-400" />
+              <span>En línea</span>
+    </>
+  ) : (
+    <>
+      <WifiOff className="w-3.5 h-3.5 text-rose-400" />
+      <span>Desconectado</span>
+    </>
+  )}
+</div>
 
             <button className="relative rounded-xl bg-slate-900 p-2 text-slate-400 hover:text-white">
               <Bell className="h-4 w-4" />
