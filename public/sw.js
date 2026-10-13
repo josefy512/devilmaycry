@@ -1,24 +1,12 @@
 // public/sw.js
-const CACHE_NAME = 'progresa-offline-v5';
+const CACHE_NAME = 'progresa-v6';
 
-// Archivos críticos y rutas de la app que se guardarán de golpe en la primera visita con internet
-const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json'
-];
-
-// 1. Instalación: Guardamos la estructura base inmediatamente
+// 1. Instalación limpia sin bloqueos de red
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
   self.skipWaiting();
 });
 
-// 2. Activación: Limpiamos versiones de caché antiguas
+// 2. Activación e inmediatamente tomar control de las pestañas
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -34,43 +22,33 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// 3. Interceptar peticiones con estrategia Cache-First absoluto
+// 3. Estrategia: Red primero, si falla va a la Caché (y si es navegación, siempre sirve la raíz guardada)
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      // Si está en caché, lo devuelve al instante (aunque no haya internet ni red)
-      if (cachedResponse) {
-        // En segundo plano intenta actualizar si hay red (silencioso)
-        fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, networkResponse);
-            });
-          }
-        }).catch(() => {});
-        return cachedResponse;
-      }
-
-      // Si no está en caché, intenta ir a la red
-      return fetch(event.request)
-        .then((networkResponse) => {
-          if (!networkResponse || networkResponse.status !== 200) {
-            return networkResponse;
-          }
-          const responseClone = networkResponse.clone();
+    fetch(event.request)
+      .then((networkResponse) => {
+        // Si hay internet, guardamos una copia fresca en caché
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
+            cache.put(event.request, responseToCache);
           });
-          return networkResponse;
-        })
-        .catch(() => {
-          // Si todo falla y es una petición de navegación de página, devolvemos el index.html principal
+        }
+        return networkResponse;
+      })
+      .catch(() => {
+        // SI NO HAY INTERNET: Buscamos en caché
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          // Si es una petición de navegación (entrar/recargar la página) y no hay red, devolvemos el index guardado
           if (event.request.mode === 'navigate') {
             return caches.match('/');
           }
         });
-    })
+      })
   );
 });
