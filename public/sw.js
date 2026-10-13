@@ -1,10 +1,14 @@
 // public/sw.js
-const CACHE_NAME = 'progresa-v4';
+const CACHE_NAME = 'progresa-offline-v5';
+
+// Archivos críticos y rutas de la app que se guardarán de golpe en la primera visita con internet
 const ASSETS_TO_CACHE = [
-  '/'
+  '/',
+  '/index.html',
+  '/manifest.json'
 ];
 
-// 1. Instalación y guardado inmediato de la ruta raíz
+// 1. Instalación: Guardamos la estructura base inmediatamente
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -14,7 +18,7 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// 2. Activación y limpieza de versiones viejas
+// 2. Activación: Limpiamos versiones de caché antiguas
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -30,14 +34,15 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// 3. Interceptar peticiones con estrategia Cache-First
+// 3. Interceptar peticiones con estrategia Cache-First absoluto
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
+      // Si está en caché, lo devuelve al instante (aunque no haya internet ni red)
       if (cachedResponse) {
-        // Actualiza en segundo plano si hay red
+        // En segundo plano intenta actualizar si hay red (silencioso)
         fetch(event.request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             caches.open(CACHE_NAME).then((cache) => {
@@ -48,6 +53,7 @@ self.addEventListener('fetch', (event) => {
         return cachedResponse;
       }
 
+      // Si no está en caché, intenta ir a la red
       return fetch(event.request)
         .then((networkResponse) => {
           if (!networkResponse || networkResponse.status !== 200) {
@@ -60,6 +66,7 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         })
         .catch(() => {
+          // Si todo falla y es una petición de navegación de página, devolvemos el index.html principal
           if (event.request.mode === 'navigate') {
             return caches.match('/');
           }
