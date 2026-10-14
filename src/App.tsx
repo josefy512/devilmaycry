@@ -1,5 +1,5 @@
-import FormularioDashboard from './componentes/formulario/formulario';
+import LoginForm from './componentes/formulario/formulario';
 
 export default function App() {
-  return < FormularioDashboard />;
+  return <LoginForm />;
 }
