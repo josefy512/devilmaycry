@@ -1,5 +1,5 @@
-import LoginForm from './componentes/formulario/formulario';
+import DashboardAlumnos from './componentes/alumnos/alumnos';
 
 export default function App() {
-  return <LoginForm />;
+  return < DashboardAlumnos />;
 }
