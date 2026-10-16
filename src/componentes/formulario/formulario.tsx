@@ -17,6 +17,46 @@ import {
 
 type Role = 'alumno' | 'docente' | 'personal';
 
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  if (role === 'alumno') {
+    try {
+      // Consultamos la tabla alumnos buscando por código y contraseña
+      const { data, error } = await supabase
+        .from('alumnos')
+        .select('*')
+        .eq('codigo', codigo.trim()) // Usamos el campo 'codigo' que ya tienes (ej. ST-1)
+        .eq('password', password)     // Validamos la contraseña
+        .single();
+
+      if (error || !data) {
+        alert('Credenciales incorrectas o alumno no encontrado.');
+        return;
+      }
+
+      // ¡Login exitoso! Guardamos los datos del alumno en el almacenamiento local del navegador
+      localStorage.setItem('usuarioLogueado', JSON.stringify({
+        nombres: data.nombres,
+        apellidos: data.apellidos,
+        codigo: data.codigo,
+        carrera: data.carrera,
+        rol: 'alumno'
+      }));
+
+      // Redirigimos al panel general de estudiantes (o cambiamos de vista en tu app)
+      window.location.href = '/alumnos'; // O la ruta que maneje tu panel de estudiantes
+
+    } catch (err) {
+      console.error('Error al iniciar sesión:', err);
+      alert('Ocurrió un error al conectar con el servidor.');
+    }
+  } else {
+    // Lógica para docentes o personal administrativo si la requieres después
+    alert(`Acceso para rol ${role} en desarrollo.`);
+  }
+};
+
 const roles: { id: Role; label: string; icon: React.ReactNode }[] = [
   { id: 'alumno', label: 'Alumno', icon: <User className="h-4 w-4" /> },
   { id: 'docente', label: 'Docente', icon: <GraduationCap className="h-4 w-4" /> },
