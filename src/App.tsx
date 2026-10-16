@@ -1,5 +1,5 @@
-import DashboardAlumnos from './componentes/alumnos/alumnos';
+import FormularioPanel from './componentes/formulario/formulario';
 
 export default function App() {
-  return < DashboardAlumnos />;
+  return < FormularioPanel />;
 }
