@@ -128,7 +128,8 @@ export default function LoginForm() {
 
         // Redirigimos recargando para que App.tsx lea el localStorage
         window.location.reload();
-
+    };
+    
   } catch (err) {
     console.error('Error al conectar:', err);
     setError('Error de conexión con la base de datos.');
