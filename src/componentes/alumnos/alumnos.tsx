@@ -288,30 +288,35 @@ return (
             ))}
           </nav>
 
-          {/* Perfil del Estudiante (Footer Sidebar) */}
+         {/* Perfil del Estudiante (Footer Sidebar) */}
           <div className="border-t border-slate-800 pt-4 mt-auto px-2">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
-                AM
+            <div className="flex items-center justify-between gap-3">
+              
+              {/* Datos del alumno */}
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white shrink-0">
+                  AM
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-white truncate">Alex Morgan</p>
+                  <p className="text-[10px] text-slate-400 truncate">Ingeniería Civil</p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-white truncate">Alex Morgan</p>
-                <p className="text-[10px] text-slate-400 truncate">Ingeniería Civil</p>
-              </div>
+
+              {/* Botón de Cerrar Sesión al costado */}
+              <button
+                onClick={handleLogout}
+                title="Cerrar Sesión"
+                className="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors shrink-0"
+              >
+                <LogOut className="h-5 w-5" />
+              </button>
+
             </div>
           </div>
-        </div>
 
-        {/* Botón de Cerrar Sesión en la parte inferior del Sidebar */}
-          <div className="pt-4 mt-auto border-t border-slate-800">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors"
-            >
-              <LogOut className="h-5 w-5" />
-              <span>Cerrar Sesión</span>
-            </button>
-          </div>
+  </div>
+</div>
 
       </aside>
 
