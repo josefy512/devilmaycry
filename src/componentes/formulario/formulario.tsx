@@ -111,11 +111,24 @@ export default function LoginForm() {
         return;
       }
 
-      // Si lo encuentra
-      alert(`¡Bienvenido/a ${data.nombres} ${data.apellidos}!\nCarrera: ${data.carrera}`);
-    } else {
-      setError(`Acceso restringido para el rol: ${role}`);
-    }
+     // Guardamos los datos del alumno en el navegador
+        localStorage.setItem(
+          'usuarioLogueado',
+          JSON.stringify({
+            nombres: data.nombres,
+            apellidos: data.apellidos,
+            codigo: data.codigo,
+            carrera: data.carrera,
+            rol: 'alumno',
+          })
+        );
+
+        // Guardamos la sección activa para que el Dashboard sepa qué mostrar
+        localStorage.setItem('progresa_student_section', 'panel');
+
+        // Redirigimos recargando para que App.tsx lea el localStorage
+        window.location.reload();
+
   } catch (err) {
     console.error('Error al conectar:', err);
     setError('Error de conexión con la base de datos.');
