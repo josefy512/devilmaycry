@@ -27,8 +27,8 @@ const handleSubmit = async (e: React.FormEvent) => {
           .from('alumnos')
           .select('*')
           .eq('codigo', codigo.trim())
-          .eq('password', password)
-          .single();
+          .eq('password', password.trim())
+          .maybeSingle();
 
         if (error || !data) {
           console.log('Intento de login fallido. Error/Data:', error, data);
