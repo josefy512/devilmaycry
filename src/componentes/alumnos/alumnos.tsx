@@ -315,9 +315,6 @@ return (
             </div>
           </div>
 
-  </div>
-</div>
-
       </aside>
 
       {/* Contenido Principal */}
