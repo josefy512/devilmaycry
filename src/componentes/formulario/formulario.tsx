@@ -17,50 +17,6 @@ import {
 
 type Role = 'alumno' | 'docente' | 'personal';
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
- if (role === 'alumno') {
-      try {
-        // Consultamos la tabla alumnos buscando por código y contraseña
-        const { data, error } = await supabase
-          .from('alumnos')
-          .select('*')
-          .eq('codigo', codigo.trim())
-          .eq('password', password.trim())
-          .maybeSingle();
-
-        if (error || !data) {
-          console.log('Intento de login fallido. Error/Data:', error, data);
-          setError('Credenciales incorrectas o alumno no encontrado.');
-          return;
-        }
-
-        // ¡Login exitoso! Guardamos los datos del alumno en el almacenamiento local del navegador
-        localStorage.setItem('usuarioLogueado', JSON.stringify({
-          nombres: data.nombres,
-          apellidos: data.apellidos,
-          codigo: data.codigo,
-          carrera: data.carrera,
-          rol: 'alumno'
-        }));
-
-        localStorage.setItem('progresa_student_section', 'panel');
-
-        // Recargamos para que App.tsx lea el localStorage y renderice el dashboard
-        window.location.reload();
-
-      } catch (err) {
-        console.error('Error al iniciar sesión:', err);
-        setError('Ocurrió un error al conectar con el servidor.');
-      }
-    
-  } else {
-    // Lógica para docentes o personal administrativo si la requieres después
-    alert(`Acceso para rol ${role} en desarrollo.`);
-  }
-};
-
 const roles: { id: Role; label: string; icon: React.ReactNode }[] = [
   { id: 'alumno', label: 'Alumno', icon: <User className="h-4 w-4" /> },
   { id: 'docente', label: 'Docente', icon: <GraduationCap className="h-4 w-4" /> },
@@ -89,6 +45,7 @@ export default function LoginForm() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null);
 
     if (!codigo.trim()) {
       setError('Ingresa tu DNI o código de alumno.');
@@ -99,17 +56,27 @@ export default function LoginForm() {
       return;
     }
 
+    setSubmitting(true);
+
     try {
-    if (role === 'alumno') {
-      
-      if (dbError) throw dbError;
+      if (role === 'alumno') {
+        // Consulta exacta a Supabase validando código y contraseña a la vez
+        const { data, error: dbError } = await supabase
+          .from('alumnos')
+          .select('*')
+          .eq('codigo', codigo.trim())
+          .eq('password', password.trim())
+          .maybeSingle();
 
-      if (!data) {
-        setError('Código de alumno no encontrado en el sistema.');
-        return;
-      }
+        if (dbError) throw dbError;
 
-     // Guardamos los datos del alumno en el navegador
+        if (!data) {
+          setError('Credenciales incorrectas o alumno no encontrado.');
+          setSubmitting(false);
+          return;
+        }
+
+        // Guardamos la sesión en el navegador
         localStorage.setItem(
           'usuarioLogueado',
           JSON.stringify({
@@ -121,23 +88,22 @@ export default function LoginForm() {
           })
         );
 
-        // Guardamos la sección activa para que el Dashboard sepa qué mostrar
         localStorage.setItem('progresa_student_section', 'panel');
 
-        // Redirigimos recargando para que App.tsx lea el localStorage
+        // Recargamos para abrir el dashboard
         window.location.reload();
-    };
-
-  } catch (err) {
-    console.error('Error al conectar:', err);
-    setError('Error de conexión con la base de datos.');
-  } finally {
-    setSubmitting(false);
-  }
+      } else {
+        setError(`El acceso para el rol ${role} está en desarrollo.`);
+        setSubmitting(false);
+      }
+    } catch (err) {
+      console.error('Error al conectar:', err);
+      setError('Error de conexión con la base de datos.');
+      setSubmitting(false);
+    }
   };
 
   return (
-    // 1. Cambiamos min-h-screen por h-screen (o h-dvh) y agregamos overflow-hidden
     <div className="relative flex h-screen w-full flex-col overflow-hidden bg-[#0a1f44]">
       {/* ===== Top status bar ===== */}
       <div
@@ -163,7 +129,6 @@ export default function LoginForm() {
       {/* ===== Main split layout ===== */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left panel — form */}
-        {/* 2. Reducimos py-8 a py-4 o py-6 y ajustamos padding lateral */}
         <div className="flex w-full flex-col justify-between px-6 py-4 sm:px-10 md:w-1/2 md:px-12 lg:px-16 overflow-y-auto">
           <div className="mx-auto flex w-full max-w-md flex-col justify-center flex-1">
             {/* Logo + PWA badge */}
@@ -242,9 +207,8 @@ export default function LoginForm() {
                   <input
                     type="text"
                     value={codigo}
-                    onChange={(e) =>
-                      setCodigo(e.target.value)}
-                    placeholder="Ej. ST -1"
+                    onChange={(e) => setCodigo(e.target.value)}
+                    placeholder="Ej. ST-1"
                     autoComplete="username"
                     className="w-full rounded-xl border border-white/15 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-blue-200/40 transition-all duration-200 focus:border-white/40 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
                   />
@@ -315,7 +279,7 @@ export default function LoginForm() {
           </div>
         </div>
 
-        {/* Right panel — photo (desktop only) */}
+        {/* Right panel — photo */}
         <div className="relative hidden overflow-hidden md:block md:w-1/2">
           <img
             src="https://images.pexels.com/photos/7972673/pexels-photo-7972673.jpeg?auto=compress&cs=tinysrgb&h=1200&w=900"
