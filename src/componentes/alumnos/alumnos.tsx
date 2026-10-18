@@ -23,7 +23,8 @@ import {
   Wifi,
   WifiOff,
   Menu,
-  X
+  X,
+  LogOut
  } from "lucide-react";
 
  type SectionId =
@@ -200,6 +201,12 @@ export default function EstudianteDashboard() {
     };
   }, []);
 
+const handleLogout = () => {
+    localStorage.removeItem('usuarioLogueado');
+    localStorage.removeItem('progresa_student_section');
+    window.location.reload();
+  };
+
 const renderView = () => {
     switch (active) {
       case 'panel':
@@ -294,6 +301,18 @@ return (
             </div>
           </div>
         </div>
+
+        {/* Botón de Cerrar Sesión en la parte inferior del Sidebar */}
+          <div className="pt-4 mt-auto border-t border-slate-800">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors"
+            >
+              <LogOut className="h-5 w-5" />
+              <span>Cerrar Sesión</span>
+            </button>
+          </div>
+
       </aside>
 
       {/* Contenido Principal */}
