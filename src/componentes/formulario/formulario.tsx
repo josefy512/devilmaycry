@@ -31,6 +31,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           .single();
 
         if (error || !data) {
+          console.log('Intento de login fallido. Error/Data:', error, data);
           setError('Credenciales incorrectas o alumno no encontrado.');
           return;
         }
@@ -100,13 +101,7 @@ export default function LoginForm() {
 
     try {
     if (role === 'alumno') {
-      // Busca en la tabla 'alumnos' coincidencia exacta con la columna 'codigo'
-      const { data, error: dbError } = await supabase
-        .from('alumnos')
-        .select('*')
-        .eq('codigo', codigo.trim())
-        .maybeSingle();
-
+      
       if (dbError) throw dbError;
 
       if (!data) {
