@@ -20,37 +20,40 @@ type Role = 'alumno' | 'docente' | 'personal';
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   
-  if (role === 'alumno') {
-    try {
-      // Consultamos la tabla alumnos buscando por código y contraseña
-      const { data, error } = await supabase
-        .from('alumnos')
-        .select('*')
-        .eq('codigo', codigo.trim()) // Usamos el campo 'codigo' que ya tienes (ej. ST-1)
-        .eq('password', password)     // Validamos la contraseña
-        .single();
+ if (role === 'alumno') {
+      try {
+        // Consultamos la tabla alumnos buscando por código y contraseña
+        const { data, error } = await supabase
+          .from('alumnos')
+          .select('*')
+          .eq('codigo', codigo.trim())
+          .eq('password', password)
+          .single();
 
-      if (error || !data) {
-        alert('Credenciales incorrectas o alumno no encontrado.');
-        return;
+        if (error || !data) {
+          setError('Credenciales incorrectas o alumno no encontrado.');
+          return;
+        }
+
+        // ¡Login exitoso! Guardamos los datos del alumno en el almacenamiento local del navegador
+        localStorage.setItem('usuarioLogueado', JSON.stringify({
+          nombres: data.nombres,
+          apellidos: data.apellidos,
+          codigo: data.codigo,
+          carrera: data.carrera,
+          rol: 'alumno'
+        }));
+
+        localStorage.setItem('progresa_student_section', 'panel');
+
+        // Recargamos para que App.tsx lea el localStorage y renderice el dashboard
+        window.location.reload();
+
+      } catch (err) {
+        console.error('Error al iniciar sesión:', err);
+        setError('Ocurrió un error al conectar con el servidor.');
       }
-
-      // ¡Login exitoso! Guardamos los datos del alumno en el almacenamiento local del navegador
-      localStorage.setItem('usuarioLogueado', JSON.stringify({
-        nombres: data.nombres,
-        apellidos: data.apellidos,
-        codigo: data.codigo,
-        carrera: data.carrera,
-        rol: 'alumno'
-      }));
-
-      // Redirigimos al panel general de estudiantes (o cambiamos de vista en tu app)
-      window.location.href = '/alumnos'; // O la ruta que maneje tu panel de estudiantes
-
-    } catch (err) {
-      console.error('Error al iniciar sesión:', err);
-      alert('Ocurrió un error al conectar con el servidor.');
-    }
+    
   } else {
     // Lógica para docentes o personal administrativo si la requieres después
     alert(`Acceso para rol ${role} en desarrollo.`);
@@ -129,7 +132,7 @@ export default function LoginForm() {
         // Redirigimos recargando para que App.tsx lea el localStorage
         window.location.reload();
     };
-    
+
   } catch (err) {
     console.error('Error al conectar:', err);
     setError('Error de conexión con la base de datos.');
