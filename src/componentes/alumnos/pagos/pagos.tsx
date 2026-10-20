@@ -11,6 +11,8 @@ import {
   Building2,
   QrCode,
   ArrowUpRight,
+  X,
+  Smartphone
 } from 'lucide-react';
 
 type PagoHistorial = {
@@ -28,6 +30,7 @@ export default function PagosView() {
   const [numOperacion, setNumOperacion] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [mensajeExito, setMensajeExito] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
 
   // Datos simulados de historial de pagos
   const [historial] = useState<PagoHistorial[]>([
@@ -106,6 +109,82 @@ export default function PagosView() {
           </h3>
           <p className="text-xs text-slate-400">
             Puedes pagar mediante transferencia, banca por internet o agente autorizado.
+          <div className="space-y-4 rounded-2xl bg-slate-900 p-6 ring-1 ring-slate-800">
+  <h3 className="text-base font-bold text-white flex items-center gap-2">
+    <Building2 className="h-5 w-5 text-blue-400" />
+    Cuentas Bancarias e Institucionales
+  </h3>
+  <p className="text-xs text-slate-400">
+    Puedes pagar mediante transferencia, banca por internet o agente autorizado.
+  </p>
+
+  {/* 👇 PEGA AQUÍ LA TARJETA INTERACTIVA DEL QR 👇 */}
+  <div 
+    onClick={() => setShowQrModal(true)}
+    className="group flex cursor-pointer items-center gap-4 rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition-all hover:border-purple-500/50 hover:bg-slate-900/90 active:scale-[0.99]"
+  >
+    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-600/20 text-purple-400 group-hover:bg-purple-600 group-hover:text-white transition-colors shrink-0">
+      <QrCode className="h-6 w-6" />
+    </div>
+    <div>
+      <h4 className="font-semibold text-white group-hover:text-purple-300 transition-colors">
+        Yape / Plin (Instituto Progresa)
+      </h4>
+      <p className="text-xs text-slate-400">
+        Teléfono: 987 654 321 • <span className="text-purple-400 underline">Toca para ampliar QR</span>
+      </p>
+    </div>
+    {/* ===== MODAL AMPLIO PARA ESCANEAR / CAPTURAR ===== */}
+{showQrModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="relative w-full max-w-sm rounded-2xl border border-slate-700 bg-[#0f172a] p-6 text-center shadow-2xl">
+      
+      {/* Botón cerrar */}
+      <button
+        onClick={() => setShowQrModal(false)}
+        className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+      >
+        <X className="h-5 w-5"/>
+      </button>
+
+      {/* Cabecera del Destinatario */}
+      <div className="mb-4">
+        <span className="inline-block rounded-full bg-purple-500/10 px-3 py-1 text-xs font-semibold text-purple-400 border border-purple-500/20">
+          Yape / Plin
+        </span>
+        <h3 className="mt-2 text-lg font-bold text-white">
+          Instituto Progresa - Caja Chica
+        </h3>
+        <p className="text-xs text-slate-400">Escanea desde tu app o toma captura</p>
+      </div>
+
+      {/* Contenedor del QR Ampliado */}
+      <div className="mx-auto my-4 flex h-60 w-60 items-center justify-center rounded-2xl bg-white p-3 shadow-inner">
+        <img
+          src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://progresa.edu.pe/pagos/demo"
+          alt="QR de Pago Yape/Plin"
+          className="h-full w-full object-contain rounded-lg"
+        />
+      </div>
+
+      {/* Número y opción */}
+      <div className="mt-4 flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/80 p-3">
+        <div className="flex items-center gap-2 text-xs text-slate-300">
+          <Smartphone className="h-4 w-4 text-purple-400"/>
+          <span className="font-mono text-sm font-bold text-white">987 654 321</span>
+        </div>
+        <span className="text-xs font-medium text-purple-400">Titular: Admin Progresa</span>
+      </div>
+
+      <p className="mt-4 text-[11px] text-slate-500">
+        * Recuerda adjuntar tu comprobante tras realizar el pago.
+      </p>
+    </div>
+  </div>
+)}
+  </div>
+
+</div>
           </p>
 
           <div className="space-y-3 pt-2">
