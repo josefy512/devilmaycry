@@ -27,9 +27,9 @@ import {
   X,
   LogOut,
   CreditCard
- } from "lucide-react";
+} from "lucide-react";
 
- type SectionId =
+type SectionId =
   | 'panel'
   | 'calendario'
   | 'tareas'
@@ -42,23 +42,23 @@ import {
   | 'pagos';
 
 type MenuItem = {
-    id: SectionId;
-    label: string;
-    icon: React.ReactNode;
-}
+  id: SectionId;
+  label: string;
+  icon: React.ReactNode;
+};
 
-type MenuGroup ={
-    title?: string;
-    items: MenuItem[];
+type MenuGroup = {
+  title?: string;
+  items: MenuItem[];
 };
 
 const menuGroups: MenuGroup[] = [
-    {
-        items: [
-            {id: 'panel', label: 'Panel de control', icon: <LayoutDashboard className="h-4 w-4" /> }
-        ]    
-    },
-   {
+  {
+    items: [
+      { id: 'panel', label: 'Panel de control', icon: <LayoutDashboard className="h-4 w-4" /> }
+    ]    
+  },
+  {
     title: 'ACADÉMICO',
     items: [
       { id: 'calendario', label: 'Calendario', icon: <Calendar className="h-4 w-4" /> },
@@ -79,7 +79,7 @@ const menuGroups: MenuGroup[] = [
       { id: 'progreso', label: 'Progreso', icon: <TrendingUp className="h-4 w-4" /> },
       { id: 'bolsa', label: 'Bolsa de trabajo', icon: <Briefcase className="h-4 w-4" /> },
       { id: 'documentos', label: 'Documentos', icon: <FileText className="h-4 w-4" /> },
-      { id: 'pagos', label: 'Pagos y Pensiones', icon: <CreditCard className="h-4 w-4" />}
+      { id: 'pagos', label: 'Pagos y Pensiones', icon: <CreditCard className="h-4 w-4" /> }
     ]
   }
 ];
@@ -168,7 +168,6 @@ const PanelControlView = () => (
   </div>
 );
 
-
 const PlaceholderView = ({ title }: { title: string }) => (
   <div className="rounded-2xl bg-slate-900 p-8 ring-1 ring-slate-800 text-center">
     <h2 className="text-xl font-bold text-white">{title}</h2>
@@ -179,13 +178,47 @@ const PlaceholderView = ({ title }: { title: string }) => (
 );
 
 export default function EstudianteDashboard() {
+  // 1. Estado para almacenar los datos del alumno logueado (DENTRO DEL COMPONENTE)
+  const [studentUser, setStudentUser] = useState<{
+    nombres: string;
+    apellidos: string;
+    codigo: string;
+    carrera: string;
+  } | null>(null);
+
+  // 2. Cargar el usuario desde localStorage al montar el componente
+  useEffect(() => {
+    const sessionData = localStorage.getItem('usuarioLogueado');
+    if (sessionData) {
+      try {
+        setStudentUser(JSON.parse(sessionData));
+      } catch (e) {
+        console.error('Error al parsear el usuario logueado:', e);
+      }
+    }
+  }, []);
+
+  // 3. Helpers para formatear el nombre, carrera e iniciales
+  const fullName = studentUser
+    ? `${studentUser.nombres} ${studentUser.apellidos}`
+    : 'Alumno Progresa';
+
+  const carrera = studentUser?.carrera || 'Carrera Profesional';
+
+  const getInitials = (name: string) => {
+    if (!name) return 'AP';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  };
+
   const [active, setActive] = useState<SectionId>(() => {
-  if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem('progresa_student_section');
-    return (saved as SectionId) || 'panel';
-  }
-  return 'panel';
-});
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('progresa_student_section');
+      return (saved as SectionId) || 'panel';
+    }
+    return 'panel';
+  });
 
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
   const [isOnline, setIsOnline] = useState<boolean>(
@@ -205,13 +238,7 @@ export default function EstudianteDashboard() {
     };
   }, []);
 
-const handleLogout = () => {
-    localStorage.removeItem('usuarioLogueado');
-    localStorage.removeItem('progresa_student_section');
-    window.location.reload();
-  };
-
-const renderView = () => {
+  const renderView = () => {
     switch (active) {
       case 'panel':
         return <PanelControlView />;
@@ -236,7 +263,7 @@ const renderView = () => {
     }
   };
 
-return (
+  return (
     <div className="flex min-h-screen w-full bg-[#0b0f17] text-slate-100 font-sans">
       {/* Sidebar Lateral */}
       <aside
@@ -294,31 +321,37 @@ return (
             ))}
           </nav>
 
-         {/* Perfil del Estudiante (Footer Sidebar) */}
-          <div className="border-t border-slate-800 pt-4 mt-auto px-2">
-            <div className="flex items-center justify-between gap-3">
-              
-              {/* Datos del alumno */}
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white shrink-0">
-                  AM
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-white truncate">Alex Morgan</p>
-                  <p className="text-[10px] text-slate-400 truncate">Ingeniería Civil</p>
-                </div>
+          {/* Seccion Perfil de Alumno en el Sidebar */}
+          <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800/80">
+            <div className="flex items-center gap-3 min-w-0">
+              {/* Avatar con Iniciales Dinámicas */}
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white shadow-md shadow-blue-500/20">
+                {getInitials(fullName)}
               </div>
 
-              {/* Botón de Cerrar Sesión al costado */}
-              <button
-                onClick={handleLogout}
-                title="Cerrar Sesión"
-                className="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors shrink-0"
-              >
-                <LogOut className="h-5 w-5" />
-              </button>
-
+              {/* Nombre y Carrera Dinámicos */}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-semibold text-white">
+                  {fullName}
+                </p>
+                <p className="truncate text-[11px] text-slate-400">
+                  {carrera}
+                </p>
+              </div>
             </div>
+
+            {/* Boton Cerrar Sesión */}
+            <button
+              onClick={() => {
+                localStorage.removeItem('usuarioLogueado');
+                localStorage.removeItem('progresa_student_section');
+                window.location.reload();
+              }}
+              title="Cerrar sesión"
+              className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors shrink-0"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </aside>
@@ -347,23 +380,23 @@ return (
           <div className="flex items-center gap-3">
             <div
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all duration-300 ${
-            isOnline
-             ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-            : 'bg-rose-500/10 text-rose-400 border-rose-500/20 animate-pulse'
-             }`}
-                  >
-                {isOnline ? (
-                       <>
-              <Wifi className="w-3.5 h-3.5 text-emerald-400" />
-              <span>En línea</span>
-    </>
-  ) : (
-    <>
-      <WifiOff className="w-3.5 h-3.5 text-rose-400" />
-      <span>Desconectado</span>
-    </>
-  )}
-</div>
+                isOnline
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                  : 'bg-rose-500/10 text-rose-400 border-rose-500/20 animate-pulse'
+              }`}
+            >
+              {isOnline ? (
+                <>
+                  <Wifi className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>En línea</span>
+                </>
+              ) : (
+                <>
+                  <WifiOff className="w-3.5 h-3.5 text-rose-400" />
+                  <span>Desconectado</span>
+                </>
+              )}
+            </div>
 
             <button className="relative rounded-xl bg-slate-900 p-2 text-slate-400 hover:text-white">
               <Bell className="h-4 w-4" />
@@ -381,7 +414,9 @@ return (
         <div className="flex-1 p-4 md:p-8 space-y-6">
           {active === 'panel' && (
             <div>
-              <h1 className="text-2xl font-bold text-white">Hola, Alex 👋</h1>
+              <h1 className="text-2xl font-bold text-white">
+                ¡Hola de nuevo, {studentUser ? studentUser.nombres : 'Alumno'}! 👋
+              </h1>
               <p className="text-xs text-slate-400 mt-1">
                 Aquí tienes el resumen de tu actividad académica para hoy.
               </p>
@@ -394,4 +429,3 @@ return (
     </div>
   );
 }
-
