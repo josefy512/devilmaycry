@@ -4,6 +4,7 @@ import BolsaDeTrabajoView from './bolsa_de_trabajo/bolsa_de_trabajo';
 import CalendarioView from './calendario/calendario';
 import DocumentosView from "./documentos/documentos";
 import DirectorioView from './directorio/directorio';
+import PagosView from './pagos/pagos';
 import { useState, useEffect } from "react";
 import { 
   LayoutDashboard,
@@ -24,7 +25,8 @@ import {
   WifiOff,
   Menu,
   X,
-  LogOut
+  LogOut,
+  CreditCard
  } from "lucide-react";
 
  type SectionId =
@@ -36,7 +38,8 @@ import {
   | 'directorio'
   | 'progreso'
   | 'bolsa'
-  | 'documentos';
+  | 'documentos'
+  | 'pagos';
 
 type MenuItem = {
     id: SectionId;
@@ -75,7 +78,8 @@ const menuGroups: MenuGroup[] = [
     items: [
       { id: 'progreso', label: 'Progreso', icon: <TrendingUp className="h-4 w-4" /> },
       { id: 'bolsa', label: 'Bolsa de trabajo', icon: <Briefcase className="h-4 w-4" /> },
-      { id: 'documentos', label: 'Documentos', icon: <FileText className="h-4 w-4" /> }
+      { id: 'documentos', label: 'Documentos', icon: <FileText className="h-4 w-4" /> },
+      { id: 'pagos', label: 'Pagos y Pensiones', icon: <CreditCard className="h-4 w-4" />}
     ]
   }
 ];
@@ -227,6 +231,8 @@ const renderView = () => {
         return <BolsaDeTrabajoView />;
       case 'documentos':
         return <DocumentosView />;
+      case 'pagos':
+        return <PagosView />;
     }
   };
 
