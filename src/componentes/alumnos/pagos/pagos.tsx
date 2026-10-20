@@ -101,15 +101,8 @@ export default function PagosView() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* 2. Cuentas y Métodos de Pago Oficiales */}
-        <div className="space-y-4 rounded-2xl bg-slate-900 p-6 ring-1 ring-slate-800">
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-blue-400" />
-            Cuentas Bancarias e Institucionales
-          </h3>
-          <p className="text-xs text-slate-400">
-            Puedes pagar mediante transferencia, banca por internet o agente autorizado.
-          <div className="space-y-4 rounded-2xl bg-slate-900 p-6 ring-1 ring-slate-800">
+       {/* 2. Cuentas y Métodos de Pago Oficiales */}
+<div className="space-y-4 rounded-2xl bg-slate-900 p-6 ring-1 ring-slate-800">
   <h3 className="text-base font-bold text-white flex items-center gap-2">
     <Building2 className="h-5 w-5 text-blue-400" />
     Cuentas Bancarias e Institucionales
@@ -118,8 +111,8 @@ export default function PagosView() {
     Puedes pagar mediante transferencia, banca por internet o agente autorizado.
   </p>
 
-  {/* 👇 PEGA AQUÍ LA TARJETA INTERACTIVA DEL QR 👇 */}
-  <div 
+  {/* Tarjeta interactiva del QR */}
+  <div
     onClick={() => setShowQrModal(true)}
     className="group flex cursor-pointer items-center gap-4 rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition-all hover:border-purple-500/50 hover:bg-slate-900/90 active:scale-[0.99]"
   >
@@ -131,135 +124,48 @@ export default function PagosView() {
         Yape / Plin (Instituto Progresa)
       </h4>
       <p className="text-xs text-slate-400">
-        Teléfono: 987 654 321 • <span className="text-purple-400 underline">Toca para ampliar QR</span>
+        Teléfono: 987 654 321 •{' '}
+        <span className="text-purple-400 underline">Toca para ampliar QR</span>
       </p>
     </div>
-    {/* ===== MODAL AMPLIO PARA ESCANEAR / CAPTURAR ===== */}
-{showQrModal && (
-  <div 
-    onClick={() => setShowQrModal(false)}
-    className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
-  >
-    {/* Contenedor principal del modal - e.stopPropagation() evita que se cierre al hacer clic dentro */}
-    <div 
-      onClick={(e) => e.stopPropagation()}
-      className="relative w-full max-w-sm cursor-default rounded-2xl border border-slate-700 bg-[#0f172a] p-6 text-center shadow-2xl"
-    >
-      
-      {/* Botón cerrar X */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setShowQrModal(false);
-        }}
-        className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
-        aria-label="Cerrar modal"
-      >
-        <X className="h-5 w-5" />
-      </button>
+  </div>
 
-      {/* Cabecera del Destinatario */}
-      <div className="mb-4">
-        <span className="inline-block rounded-full bg-purple-500/10 px-3 py-1 text-xs font-semibold text-purple-400 border border-purple-500/20">
-          Yape / Plin
+  
+    {/* Banco de la Nación */}
+    <div className="space-y-3 pt-2">
+    {/* Banco de la Nación */}
+    <div className="rounded-xl bg-slate-950 p-4 border border-slate-800">
+      <div className="flex justify-between items-center mb-2">
+        <span className="text-xs font-bold text-slate-200">Banco de la Nación (Cuenta Corriente)</span>
+        <span className="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-md border border-blue-500/20">
+          Agente / Ventanilla
         </span>
-        <h3 className="mt-2 text-lg font-bold text-white">
-          Instituto Progresa - Caja Chica
-        </h3>
-        <p className="text-xs text-slate-400">Escanea desde tu app o toma captura</p>
       </div>
-
-      {/* Contenedor del QR Ampliado */}
-      <div className="mx-auto my-4 flex h-60 w-60 items-center justify-center rounded-2xl bg-white p-3 shadow-inner">
-        <img
-          src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://progresa.edu.pe/pagos/demo"
-          alt="QR de Pago Yape/Plin"
-          className="h-full w-full object-contain rounded-lg"
-        />
+      <div className="flex justify-between items-center text-xs bg-slate-900 p-2 rounded-lg border border-slate-800 font-mono text-slate-300">
+        <span>00-011-123456</span>
+        <button onClick={() => copiarTexto('00-011-123456', 'bn')} className="text-slate-400 hover:text-white">
+          {copiado === 'bn' ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+        </button>
       </div>
+    </div>
 
-      {/* Número y opción */}
-      <div className="mt-4 flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/80 p-3">
-        <div className="flex items-center gap-2 text-xs text-slate-300">
-          <Smartphone className="h-4 w-4 text-purple-400" />
-          <span className="font-mono text-sm font-bold text-white">987 654 321</span>
-        </div>
-        <span className="text-xs font-medium text-purple-400">Titular: Admin Progresa</span>
+    {/* BCP / CCI */}
+    <div className="rounded-xl bg-slate-950 p-4 border border-slate-800">
+      <div className="flex justify-between items-center mb-2">
+        <span className="text-xs font-bold text-slate-200">BCP - Código CCI (Interbancario)</span>
+        <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-md border border-emerald-500/20">
+          Transferencia
+        </span>
       </div>
-
-      <p className="mt-4 text-[11px] text-slate-500">
-        * Recuerda adjuntar tu comprobante tras realizar el pago.
-      </p>
+      <div className="flex justify-between items-center text-xs bg-slate-900 p-2 rounded-lg border border-slate-800 font-mono text-slate-300">
+        <span>002-191-001234567890-54</span>
+        <button onClick={() => copiarTexto('002-191-001234567890-54', 'cci')} className="text-slate-400 hover:text-white">
+          {copiado === 'cci' ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+        </button>
+      </div>
     </div>
   </div>
-)}
-  </div>
-
 </div>
-          </p>
-
-          <div className="space-y-3 pt-2">
-            {/* Banco de la Nación */}
-            <div className="rounded-xl bg-slate-950 p-4 border border-slate-800">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-bold text-slate-200">Banco de la Nación (Cuenta Corriente)</span>
-                <span className="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-md border border-blue-500/20">
-                  Agente / Ventanilla
-                </span>
-              </div>
-              <div className="flex justify-between items-center text-xs bg-slate-900 p-2 rounded-lg border border-slate-800 font-mono text-slate-300">
-                <span>00-011-123456</span>
-                <button
-                  onClick={() => copiarTexto('00-011-123456', 'bn')}
-                  className="text-slate-400 hover:text-white"
-                >
-                  {copiado === 'bn' ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* BCP / CCI */}
-            <div className="rounded-xl bg-slate-950 p-4 border border-slate-800">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-bold text-slate-200">BCP - Código CCI (Interbancario)</span>
-                <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-md border border-emerald-500/20">
-                  Transferencia
-                </span>
-              </div>
-              <div className="flex justify-between items-center text-xs bg-slate-900 p-2 rounded-lg border border-slate-800 font-mono text-slate-300">
-                <span>002-191-001234567890-54</span>
-                <button
-                  onClick={() => copiarTexto('002-191-001234567890-54', 'cci')}
-                  className="text-slate-400 hover:text-white"
-                >
-                  {copiado === 'cci' ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Yape / Plin */}
-            <div className="rounded-xl bg-slate-950 p-4 border border-slate-800">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400">
-                    <QrCode className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-200">Yape / Plin Institucional</p>
-                    <p className="text-[11px] text-slate-400">Teléfono: 987 654 321</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => copiarTexto('987654321', 'yape')}
-                  className="p-2 bg-slate-900 rounded-lg hover:bg-slate-800 text-slate-300"
-                >
-                  {copiado === 'yape' ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* 3. Módulo "Subir Voucher de Pago" */}
         <div className="space-y-4 rounded-2xl bg-slate-900 p-6 ring-1 ring-slate-800">
@@ -373,6 +279,53 @@ export default function PagosView() {
           </table>
         </div>
       </div>
-    </div>
+      {showQrModal && (
+   <div
+          onClick={() => setShowQrModal(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-sm cursor-default rounded-2xl border border-slate-700 bg-[#0f172a] p-6 text-center shadow-2xl"
+          >
+            <button
+              type="button"
+              onClick={() => setShowQrModal(false)}
+              className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+              aria-label="Cerrar modal"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <div className="mb-4">
+              <span className="inline-block rounded-full bg-purple-500/10 px-3 py-1 text-xs font-semibold text-purple-400 border border-purple-500/20">
+                Yape / Plin
+              </span>
+              <h3 className="mt-2 text-lg font-bold text-white">Instituto Progresa - Caja Chica</h3>
+              <p className="text-xs text-slate-400">Escanea desde tu app o toma captura</p>
+            </div>
+
+            <div className="mx-auto my-4 flex h-60 w-60 items-center justify-center rounded-2xl bg-white p-3 shadow-inner">
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://progresa.edu.pe/pagos/demo"
+                alt="QR de Pago Yape/Plin"
+                className="h-full w-full object-contain rounded-lg"
+              />
+            </div>
+
+            <div className="mt-4 flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/80 p-3">
+              <div className="flex items-center gap-2 text-xs text-slate-300">
+                <Smartphone className="h-4 w-4 text-purple-400" />
+                <span className="font-mono text-sm font-bold text-white">987 654 321</span>
+              </div>
+              <span className="text-xs font-medium text-purple-400">Titular: Admin Progresa</span>
+            </div>
+
+            <p className="mt-4 text-[11px] text-slate-500">
+              * Recuerda adjuntar tu comprobante tras realizar el pago.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>  
   );
 }
