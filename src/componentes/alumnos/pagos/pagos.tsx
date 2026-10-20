@@ -136,15 +136,27 @@ export default function PagosView() {
     </div>
     {/* ===== MODAL AMPLIO PARA ESCANEAR / CAPTURAR ===== */}
 {showQrModal && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-    <div className="relative w-full max-w-sm rounded-2xl border border-slate-700 bg-[#0f172a] p-6 text-center shadow-2xl">
+  <div 
+    onClick={() => setShowQrModal(false)}
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
+  >
+    {/* Contenedor principal del modal - e.stopPropagation() evita que se cierre al hacer clic dentro */}
+    <div 
+      onClick={(e) => e.stopPropagation()}
+      className="relative w-full max-w-sm cursor-default rounded-2xl border border-slate-700 bg-[#0f172a] p-6 text-center shadow-2xl"
+    >
       
-      {/* Botón cerrar */}
+      {/* Botón cerrar X */}
       <button
-        onClick={() => setShowQrModal(false)}
-        className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowQrModal(false);
+        }}
+        className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
+        aria-label="Cerrar modal"
       >
-        <X className="h-5 w-5"/>
+        <X className="h-5 w-5" />
       </button>
 
       {/* Cabecera del Destinatario */}
@@ -170,7 +182,7 @@ export default function PagosView() {
       {/* Número y opción */}
       <div className="mt-4 flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/80 p-3">
         <div className="flex items-center gap-2 text-xs text-slate-300">
-          <Smartphone className="h-4 w-4 text-purple-400"/>
+          <Smartphone className="h-4 w-4 text-purple-400" />
           <span className="font-mono text-sm font-bold text-white">987 654 321</span>
         </div>
         <span className="text-xs font-medium text-purple-400">Titular: Admin Progresa</span>
