@@ -64,16 +64,16 @@ export default function LoginForm() {
         const { data, error: dbError } = await supabase
           .from('alumnos')
           .select(`
-               nombres,
-               apellidos,
-               codigo,
-               carrera,
-               institucion_id,
-               instituciones (
-               nombre
-              )
-            `)
-          .eq('codigo', codigo.trim())
+            dni,
+            nombres,
+            apellidos,
+            carrera,
+            institucion_id,
+            instituciones (
+              nombre
+            )
+          `)
+          .eq('dni', codigo.trim())
           .eq('password', password.trim())
           .maybeSingle();
 
@@ -86,18 +86,22 @@ export default function LoginForm() {
         }
 
         // Guardamos la sesión en el navegador
+        // Extraemos el nombre de la institución de forma segura
+        const instNombre = Array.isArray(data.instituciones)
+          ? data.instituciones[0]?.nombre
+          : (data.instituciones as any)?.nombre || 'Institución Educativa';
+
         localStorage.setItem(
           'usuarioLogueado',
           JSON.stringify({
             nombres: data.nombres,
             apellidos: data.apellidos,
-            codigo: data.codigo,
+            codigo: data.dni,
             carrera: data.carrera,
-            // Extraemos el nombre de la tabla instituciones
-            institucionNombre: (data.instituciones as any)?.nombre || 'Institución Educativa',
+            institucionNombre: instNombre,
             rol: 'alumno',
-           })
-          );
+          })
+        );
 
         localStorage.setItem('progresa_student_section', 'panel');
 
