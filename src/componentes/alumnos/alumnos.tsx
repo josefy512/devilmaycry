@@ -184,7 +184,11 @@ export default function EstudianteDashboard() {
     apellidos: string;
     codigo: string;
     carrera: string;
+    institucionNombre?: string;
   } | null>(null);
+
+    // Nombre dinámico de la institución educativa
+  const nombreInstitucion = studentUser?.institucionNombre || 'Institución Educativa';
 
   // 2. Cargar el usuario desde localStorage al montar el componente
   useEffect(() => {
@@ -273,16 +277,21 @@ export default function EstudianteDashboard() {
       >
         <div className="flex h-full min-h-screen flex-col border-r border-slate-800 bg-[#0b0f17] p-4">
           {/* Header Sidebar */}
-          <div className="flex items-center justify-between px-2 py-3">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-                <BookOpen className="h-5 w-5" />
+         <div className="flex items-center justify-between px-2 py-3 border-b border-slate-800/80 pb-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600/20 border border-blue-500/30 text-blue-400">
+                <BookOpen className="h-4 w-4" />
               </div>
-              <span className="font-bold text-white text-sm">Espacio del Estudiante</span>
+              <div className="min-w-0 flex-1">
+                <span className="block truncate font-bold text-white text-xs" title={nombreInstitucion}>
+                  {nombreInstitucion}
+                </span>
+                <span className="block text-[10px] text-slate-500 font-medium">Plataforma Progresa</span>
+              </div>
             </div>
             <button
               onClick={() => setMobileOpen(false)}
-              className="text-slate-400 hover:text-white md:hidden"
+              className="text-slate-400 hover:text-white md:hidden shrink-0"
             >
               <X className="h-5 w-5" />
             </button>
