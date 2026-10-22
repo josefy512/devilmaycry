@@ -59,10 +59,10 @@ export default function LoginForm() {
     setSubmitting(true);
 
     try {
-      if (role === 'alumno') {
+     if (role === 'alumno') {
   const { data: alumno, error: dbError } = await supabase
     .from('alumnos')
-    .select('*, instituciones(nombre)')
+    .select('*')
     .eq('dni', codigo.trim())
     .eq('password', password.trim())
     .maybeSingle();
@@ -75,10 +75,19 @@ export default function LoginForm() {
     return;
   }
 
-  // Si la relación es 1 a 1, instituciones es un objeto
+  console.log('ALUMNO:', alumno);
+
+  // Buscar la institución por su código (ej: "ASM-01")
+  const { data: inst, error: instError } = await supabase
+    .from('instituciones')
+    .select('*')
+    .eq('codigo', alumno.institucion_id)
+    .maybeSingle();
+
+  console.log('INSTITUCION:', inst, 'ERROR:', instError);
+
   const nombreInst =
-    (alumno.instituciones as { nombre?: string } | null)?.nombre ||
-    'Institución Educativa';
+    inst?.nombre || inst?.name || 'Institución Educativa';
 
   localStorage.setItem(
     'usuarioLogueado',
