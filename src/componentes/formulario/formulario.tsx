@@ -210,7 +210,7 @@ export default function LoginForm() {
               <label className="block">
                 <span className="mb-1 block text-xs font-medium text-blue-100/90 sm:text-sm">
                   {role === 'alumno'
-                    ? 'DNI / Código de Alumno'
+                    ? 'DNI'
                     : role === 'docente'
                     ? 'DNI / Código Docente'
                     : 'DNI / Código de Personal'}
@@ -223,7 +223,7 @@ export default function LoginForm() {
                     type="text"
                     value={codigo}
                     onChange={(e) => setCodigo(e.target.value)}
-                    placeholder="Ej. ST-1"
+                    placeholder="DNI"
                     autoComplete="username"
                     className="w-full rounded-xl border border-white/15 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-blue-200/40 transition-all duration-200 focus:border-white/40 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
                   />
