@@ -48,7 +48,7 @@ export default function LoginForm() {
     setError(null);
 
     if (!codigo.trim()) {
-      setError('Ingresa tu DNI o código de alumno.');
+      setError('Ingresa tu DNI.');
       return;
     }
     if (!password) {
@@ -60,15 +60,15 @@ export default function LoginForm() {
 
     try {
       if (role === 'alumno') {
-        // 1. Obtener el alumno por DNI y contraseña
-        const { data: alumno, error: alumnoError } = await supabase
+        // 1. Buscamos al alumno por su DNI en Supabase
+        const { data: alumno, error: dbError } = await supabase
           .from('alumnos')
           .select('*')
           .eq('dni', codigo.trim())
           .eq('password', password.trim())
           .maybeSingle();
 
-        if (alumnoError) throw alumnoError;
+        if (dbError) throw dbError;
 
         if (!alumno) {
           setError('Credenciales incorrectas o alumno no encontrado.');
@@ -76,22 +76,34 @@ export default function LoginForm() {
           return;
         }
 
-        // 2. Obtener la institución asociada directamente usando su ID/código
-        let nombreInstitucion = 'Institución Educativa';
+        // 2. Traemos explícitamente el nombre de la institución desde la tabla instituciones
+        let nombreInst = 'Institución Educativa';
 
         if (alumno.institucion_id) {
+          // Buscamos primero si institucion_id coincide con el id de instituciones
           const { data: instData } = await supabase
             .from('instituciones')
             .select('nombre')
-            .or(`id.eq.${alumno.institucion_id},codigo.eq.${alumno.institucion_id}`)
+            .eq('id', alumno.institucion_id)
             .maybeSingle();
 
           if (instData?.nombre) {
-            nombreInstitucion = instData.nombre;
+            nombreInst = instData.nombre;
+          } else {
+            // Si no coincide por id, probamos si coincide por el código (ej. ASM-01, UNI-02)
+            const { data: instByCodigo } = await supabase
+              .from('instituciones')
+              .select('nombre')
+              .eq('codigo', alumno.institucion_id)
+              .maybeSingle();
+
+            if (instByCodigo?.nombre) {
+              nombreInst = instByCodigo.nombre;
+            }
           }
         }
 
-        // 3. Guardar en localStorage
+        // 3. Guardamos la sesión con el nombre REAL en localStorage
         localStorage.setItem(
           'usuarioLogueado',
           JSON.stringify({
@@ -99,20 +111,25 @@ export default function LoginForm() {
             apellidos: alumno.apellidos,
             codigo: alumno.dni,
             carrera: alumno.carrera,
-            institucionNombre: nombreInstitucion,
+            institucionNombre: nombreInst,
             rol: 'alumno',
           })
         );
 
         localStorage.setItem('progresa_student_section', 'panel');
 
-        // Recargamos para abrir el dashboard
+        // Recargamos la ventana para abrir el dashboard
         window.location.reload();
       } else {
         setError(`El acceso para el rol ${role} está en desarrollo.`);
         setSubmitting(false);
       }
     } catch (err) {
+      console.error('Error al conectar:', err);
+      setError('Error de conexión con la base de datos.');
+      setSubmitting(false);
+    }
+  }; catch (err) {
       console.error('Error al conectar:', err);
       setError('Error de conexión con la base de datos.');
       setSubmitting(false);
