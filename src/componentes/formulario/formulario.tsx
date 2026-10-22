@@ -63,7 +63,16 @@ export default function LoginForm() {
         // Consulta exacta a Supabase validando código y contraseña a la vez
         const { data, error: dbError } = await supabase
           .from('alumnos')
-          .select('*')
+          .select(`
+               nombres,
+               apellidos,
+               codigo,
+               carrera,
+               institucion_id,
+               instituciones (
+               nombre
+              )
+            `)
           .eq('codigo', codigo.trim())
           .eq('password', password.trim())
           .maybeSingle();
@@ -84,9 +93,11 @@ export default function LoginForm() {
             apellidos: data.apellidos,
             codigo: data.codigo,
             carrera: data.carrera,
+            // Extraemos el nombre de la tabla instituciones
+            institucionNombre: (data.instituciones as any)?.nombre || 'Institución Educativa',
             rol: 'alumno',
-          })
-        );
+           })
+          );
 
         localStorage.setItem('progresa_student_section', 'panel');
 
