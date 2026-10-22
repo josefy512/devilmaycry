@@ -60,65 +60,41 @@ export default function LoginForm() {
 
     try {
       if (role === 'alumno') {
-        // 1. Buscamos al alumno por su DNI en Supabase
-        const { data: alumno, error: dbError } = await supabase
-          .from('alumnos')
-          .select('*')
-          .eq('dni', codigo.trim())
-          .eq('password', password.trim())
-          .maybeSingle();
+  const { data: alumno, error: dbError } = await supabase
+    .from('alumnos')
+    .select('*, instituciones(nombre)')
+    .eq('dni', codigo.trim())
+    .eq('password', password.trim())
+    .maybeSingle();
 
-        if (dbError) throw dbError;
+  if (dbError) throw dbError;
 
-        if (!alumno) {
-          setError('Credenciales incorrectas o alumno no encontrado.');
-          setSubmitting(false);
-          return;
-        }
+  if (!alumno) {
+    setError('Credenciales incorrectas o alumno no encontrado.');
+    setSubmitting(false);
+    return;
+  }
 
-        // 2. Traemos explícitamente el nombre de la institución desde la tabla instituciones
-        let nombreInst = 'Institución Educativa';
+  // Si la relación es 1 a 1, instituciones es un objeto
+  const nombreInst =
+    (alumno.instituciones as { nombre?: string } | null)?.nombre ||
+    'Institución Educativa';
 
-        if (alumno.institucion_id) {
-          const { data: instData } = await supabase
-            .from('instituciones')
-            .select('nombre')
-            .eq('id', alumno.institucion_id)
-            .maybeSingle();
+  localStorage.setItem(
+    'usuarioLogueado',
+    JSON.stringify({
+      nombres: alumno.nombres,
+      apellidos: alumno.apellidos,
+      codigo: alumno.dni,
+      carrera: alumno.carrera,
+      institucionNombre: nombreInst,
+      rol: 'alumno',
+    })
+  );
 
-          if (instData?.nombre) {
-            nombreInst = instData.nombre;
-          } else {
-            const { data: instByCodigo } = await supabase
-              .from('instituciones')
-              .select('nombre')
-              .eq('codigo', alumno.institucion_id)
-              .maybeSingle();
-
-            if (instByCodigo?.nombre) {
-              nombreInst = instByCodigo.nombre;
-            }
-          }
-        }
-
-        // 3. Guardamos la sesión con el nombre REAL en localStorage
-        localStorage.setItem(
-          'usuarioLogueado',
-          JSON.stringify({
-            nombres: alumno.nombres,
-            apellidos: alumno.apellidos,
-            codigo: alumno.dni,
-            carrera: alumno.carrera,
-            institucionNombre: nombreInst,
-            rol: 'alumno',
-          })
-        );
-
-        localStorage.setItem('progresa_student_section', 'panel');
-
-        // Recargamos la ventana para abrir el dashboard
-        window.location.reload();
-      } else {
+  localStorage.setItem('progresa_student_section', 'panel');
+  window.location.reload();
+} else {
         setError(`El acceso para el rol ${role} está en desarrollo.`);
         setSubmitting(false);
       }
