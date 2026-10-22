@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import FutPage from './FUT/fut';
 import { 
   Search, 
   Bell, 
@@ -7,18 +8,18 @@ import {
   FileText, 
   Download, 
   Eye, 
-  CheckCircle2, 
-  BookOpen, 
-  FileSpreadsheet, 
   Award, 
   ShieldCheck, 
   ChevronRight, 
-  Building2,
-  Calendar
+  FileSpreadsheet,
+  BookOpen,
+  Calendar,
+  X
 } from 'lucide-react';
 
 export default function DocumentosView() {
   const [activeCategory, setActiveCategory] = useState('Todos');
+  const [showFutModal, setShowFutModal] = useState(false);
 
   const silabos = [
     {
@@ -108,7 +109,10 @@ export default function DocumentosView() {
             <Upload className="w-4 h-4 text-slate-400" />
             <span>Subir Documento</span>
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-all shadow-lg shadow-blue-600/20">
+          <button 
+            onClick={() => setShowFutModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-all shadow-lg shadow-blue-600/20"
+          >
             <Plus className="w-4 h-4" />
             <span>Solicitar Trámite Oficial</span>
           </button>
@@ -271,26 +275,35 @@ export default function DocumentosView() {
               </p>
             </div>
 
-            <div className="bg-[#0B0F17] p-3 rounded-xl border border-slate-800 space-y-2">
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">PASOS PARA TRAMITAR:</p>
-              <ol className="text-xs text-slate-300 space-y-1.5 pl-4 list-decimal">
-                <li>Descargar y rellenar formato digital</li>
-                <li>Adjuntar sustento y voucher de pago</li>
-                <li>Ingresar por Mesa de Partes Virtual</li>
-              </ol>
+            {/* Ventajas del trámite digital */}
+            <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 text-xs text-slate-300 space-y-2">
+              <p className="font-semibold text-slate-200">VENTAJAS DEL TRÁMITE DIGITAL:</p>
+              <ul className="space-y-1.5 text-slate-400">
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                  Pre-llenado automático de tus datos personales.
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                  Emisión instantánea de constancia con código de ticket.
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                  Sin imprimir ni hacer colas en ventanilla.
+                </li>
+              </ul>
             </div>
 
-            <div className="space-y-2 pt-1">
-              <button className="w-full flex items-center justify-center gap-2 py-2.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-semibold transition-colors">
-                <Download className="w-3.5 h-3.5" />
-                <span>Descargar FUT (Word Editable)</span>
-              </button>
+            {/* Botón Principal para Abrir el FUT Digital */}
+            <button
+              type="button"
+              onClick={() => setShowFutModal(true)}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/20 transition-all text-sm"
+            >
+              <FileText className="w-4 h-4" />
+              Llenar FUT Digital Ahora
+            </button>
 
-              <button className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#1C2538] hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold transition-colors">
-                <Download className="w-3.5 h-3.5 text-rose-400" />
-                <span>Descargar FUT (PDF Oficial)</span>
-              </button>
-            </div>
           </div>
         </div>
 
@@ -390,6 +403,24 @@ export default function DocumentosView() {
         </div>
 
       </div>
+
+      {/* Modal Emergente FUT Digital */}
+      {showFutModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+          <div className="relative w-full max-w-4xl bg-[#0b0f17] border border-slate-800 rounded-2xl max-h-[92vh] overflow-y-auto shadow-2xl">
+            <button
+              onClick={() => setShowFutModal(false)}
+              className="absolute top-4 right-4 z-10 p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-full transition-all border border-slate-700"
+              title="Cerrar Formulario"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="p-2 sm:p-4">
+              <FutPage />
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
