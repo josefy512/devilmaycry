@@ -10,7 +10,10 @@ import {
   Building2,
   Calendar,
   User,
-  HelpCircle
+  HelpCircle,
+  Upload,
+  File,
+  X
 } from 'lucide-react';
 
 interface FutFormData {
@@ -44,6 +47,7 @@ export const FutPage: React.FC = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [cargoData, setCargoData] = useState<{ ticket: string; fechaHora: string } | null>(null);
+  const [archivoAdjunto, setArchivoAdjunto] = useState<File | null>(null);
 
   // Intentar cargar datos del usuario desde localStorage para evitar reescritura
   useEffect(() => {
@@ -286,18 +290,56 @@ export const FutPage: React.FC = () => {
             />
           </div>
 
-          {/* Campo 8: Documentos que se adjuntan */}
+          {/* Campo 8: Documentos que se adjuntan (Carga de Archivos Real) */}
           <div className="space-y-2">
-            <label className="block text-xs font-semibold text-slate-400">8.- DOCUMENTOS QUE SE ADJUNTA (OPCIONAL / ENLACES O NOMBRES DE VOUCHERS)</label>
-            <input
-              type="text"
-              name="documentosAdjuntos"
-              disabled={isSubmitted}
-              placeholder="Ej.: Copia de DNI, Voucher de Pago N° 82910"
-              value={formData.documentosAdjuntos}
-              onChange={handleChange}
-              className="w-full bg-slate-950/80 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 disabled:opacity-60"
-            />
+            <label className="block text-xs font-semibold text-slate-400">
+              8.- DOCUMENTOS QUE SE ADJUNTA (VOUCHER DE PAGO, DNI, ETC.)
+            </label>
+            
+            {!archivoAdjunto ? (
+              <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-slate-700 border-dashed rounded-xl cursor-pointer bg-slate-950/60 hover:bg-slate-950/90 transition-all group">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6 px-4 text-center">
+                  <Upload className="w-6 h-6 mb-2 text-blue-400 group-hover:scale-110 transition-transform" />
+                  <p className="text-xs text-slate-300 font-medium">
+                    <span className="text-blue-400 font-semibold">Haz clic para subir</span> o arrastra tu archivo
+                  </p>
+                  <p className="text-[10px] text-slate-500 mt-1">PDF, PNG, JPG (Máx. 10MB)</p>
+                </div>
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  accept=".pdf,.png,.jpg,.jpeg"
+                  disabled={isSubmitted}
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setArchivoAdjunto(e.target.files[0]);
+                    }
+                  }}
+                />
+              </label>
+            ) : (
+              <div className="flex items-center justify-between p-3 bg-slate-950 border border-emerald-500/30 rounded-xl">
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg shrink-0">
+                    <File className="w-5 h-5" />
+                  </div>
+                  <div className="truncate">
+                    <p className="text-xs font-semibold text-slate-200 truncate">{archivoAdjunto.name}</p>
+                    <p className="text-[10px] text-slate-400">{(archivoAdjunto.size / (1024 * 1024)).toFixed(2)} MB • Adjuntado correctamente</p>
+                  </div>
+                </div>
+                {!isSubmitted && (
+                  <button
+                    type="button"
+                    onClick={() => setArchivoAdjunto(null)}
+                    className="p-1.5 bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 rounded-lg transition-colors"
+                    title="Remover archivo"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Campo 9 y 10: Lugar, Fecha y Firma */}
