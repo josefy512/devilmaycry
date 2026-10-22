@@ -80,7 +80,6 @@ export default function LoginForm() {
         let nombreInst = 'Institución Educativa';
 
         if (alumno.institucion_id) {
-          // Buscamos primero si institucion_id coincide con el id de instituciones
           const { data: instData } = await supabase
             .from('instituciones')
             .select('nombre')
@@ -90,7 +89,6 @@ export default function LoginForm() {
           if (instData?.nombre) {
             nombreInst = instData.nombre;
           } else {
-            // Si no coincide por id, probamos si coincide por el código (ej. ASM-01, UNI-02)
             const { data: instByCodigo } = await supabase
               .from('instituciones')
               .select('nombre')
@@ -125,6 +123,11 @@ export default function LoginForm() {
         setSubmitting(false);
       }
     } catch (err) {
+      console.error('Error al conectar:', err);
+      setError('Error de conexión con la base de datos.');
+      setSubmitting(false);
+    }
+  }; catch (err) {
       console.error('Error al conectar:', err);
       setError('Error de conexión con la base de datos.');
       setSubmitting(false);
