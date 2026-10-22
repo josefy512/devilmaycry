@@ -81,7 +81,7 @@ export default function LoginForm() {
   const { data: inst, error: instError } = await supabase
     .from('instituciones')
     .select('*')
-    .eq('codigo', alumno.institucion_id)
+    .eq('id', alumno.institucion_id)
     .maybeSingle();
 
   console.log('INSTITUCION:', inst, 'ERROR:', instError);
