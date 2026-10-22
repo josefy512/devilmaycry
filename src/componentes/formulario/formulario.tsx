@@ -127,16 +127,6 @@ export default function LoginForm() {
       setError('Error de conexión con la base de datos.');
       setSubmitting(false);
     }
-  }; catch (err) {
-      console.error('Error al conectar:', err);
-      setError('Error de conexión con la base de datos.');
-      setSubmitting(false);
-    }
-  }; catch (err) {
-      console.error('Error al conectar:', err);
-      setError('Error de conexión con la base de datos.');
-      setSubmitting(false);
-    }
   };
 
   return (
