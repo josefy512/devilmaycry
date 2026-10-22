@@ -60,45 +60,46 @@ export default function LoginForm() {
 
     try {
       if (role === 'alumno') {
-        // Consulta exacta a Supabase validando código y contraseña a la vez
-        const { data, error: dbError } = await supabase
+        // 1. Obtener el alumno por DNI y contraseña
+        const { data: alumno, error: alumnoError } = await supabase
           .from('alumnos')
-          .select(`
-            dni,
-            nombres,
-            apellidos,
-            carrera,
-            institucion_id,
-            instituciones (
-              nombre
-            )
-          `)
+          .select('*')
           .eq('dni', codigo.trim())
           .eq('password', password.trim())
           .maybeSingle();
 
-        if (dbError) throw dbError;
+        if (alumnoError) throw alumnoError;
 
-        if (!data) {
+        if (!alumno) {
           setError('Credenciales incorrectas o alumno no encontrado.');
           setSubmitting(false);
           return;
         }
 
-        // Guardamos la sesión en el navegador
-        // Extraemos el nombre de la institución de forma segura
-        const instNombre = Array.isArray(data.instituciones)
-          ? data.instituciones[0]?.nombre
-          : (data.instituciones as any)?.nombre || 'Institución Educativa';
+        // 2. Obtener la institución asociada directamente usando su ID/código
+        let nombreInstitucion = 'Institución Educativa';
 
+        if (alumno.institucion_id) {
+          const { data: instData } = await supabase
+            .from('instituciones')
+            .select('nombre')
+            .or(`id.eq.${alumno.institucion_id},codigo.eq.${alumno.institucion_id}`)
+            .maybeSingle();
+
+          if (instData?.nombre) {
+            nombreInstitucion = instData.nombre;
+          }
+        }
+
+        // 3. Guardar en localStorage
         localStorage.setItem(
           'usuarioLogueado',
           JSON.stringify({
-            nombres: data.nombres,
-            apellidos: data.apellidos,
-            codigo: data.dni,
-            carrera: data.carrera,
-            institucionNombre: instNombre,
+            nombres: alumno.nombres,
+            apellidos: alumno.apellidos,
+            codigo: alumno.dni,
+            carrera: alumno.carrera,
+            institucionNombre: nombreInstitucion,
             rol: 'alumno',
           })
         );
