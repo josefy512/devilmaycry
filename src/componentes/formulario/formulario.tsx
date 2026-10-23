@@ -140,6 +140,7 @@ export default function LoginForm() {
             nombres: docente.nombres,
             apellidos: docente.apellidos,
             codigo: docente.dni,
+            email: docente.email, 
             especialidad: docente.especialidad,
             institucionNombre: nombreInst,
             rol: 'docente',

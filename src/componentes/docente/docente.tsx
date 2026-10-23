@@ -4,7 +4,6 @@ import AsistenciasPanel from "./asistencias/asistencias";
 import HorariosPanel from "./horarios/horarios";
 import CursosPanel from "./cursos/cursos";
 
-
 import { 
   LayoutDashboard, 
   CheckSquare, 
@@ -36,6 +35,14 @@ export default function DocentesLayout() {
   const [activeSection, setActiveSection] = useState<DocenteSectionId>('panel');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Obtener los datos del docente logueado desde el localStorage
+  const usuario = JSON.parse(localStorage.getItem('usuarioLogueado') || '{}');
+  const nombreCompleto = `${usuario.nombres || 'Docente'} ${usuario.apellidos || ''}`.trim();
+  const correoDocente = usuario.email || 'correo@progresa.edu.pe';
+  
+  // Calcular iniciales para el avatar (ej: "Juan Pérez" -> "JP")
+  const iniciales = `${usuario.nombres?.[0] || ''}${usuario.apellidos?.[0] || ''}`.toUpperCase() || 'DC';
+
   const navigationItems = [
     { id: 'panel', label: 'Panel de control', icon: LayoutDashboard },
     { id: 'calificaciones', label: 'Calificaciones', icon: Award },
@@ -43,6 +50,12 @@ export default function DocentesLayout() {
     { id: 'horarios', label: 'Horarios', icon: Calendar },
     { id: 'cursos', label: 'Mis Cursos', icon: BookOpen },
   ];
+
+  const handleCerrarSesion = () => {
+    localStorage.removeItem('usuarioLogueado');
+    localStorage.removeItem('progresa_student_section');
+    window.location.reload();
+  };
 
   return (
     <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex font-sans">
@@ -66,11 +79,11 @@ export default function DocentesLayout() {
           <div className="flex items-center justify-between pb-4 border-b border-slate-800/80">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-sm text-white shadow-md shadow-blue-500/20">
-                MR
+                {iniciales}
               </div>
               <div className="overflow-hidden">
-                <h2 className="font-bold text-sm text-white truncate">Marta Rodríguez</h2>
-                <p className="text-[11px] text-slate-400 truncate">Gestión Académica</p>
+                <h2 className="font-bold text-sm text-white truncate">{nombreCompleto}</h2>
+                <p className="text-[11px] text-slate-400 truncate">{correoDocente}</p>
               </div>
             </div>
             <button 
@@ -125,7 +138,7 @@ export default function DocentesLayout() {
           </button>
 
           <button
-            onClick={() => alert('Cerrando sesión...')}
+            onClick={handleCerrarSesion}
             className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors"
           >
             <LogOut className="w-4 h-4" />
@@ -135,9 +148,9 @@ export default function DocentesLayout() {
       </aside>
 
       {/* 2. ÁREA DE CONTENIDO PRINCIPAL */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-1 flex-col min-w-0">
         
-        {/* Header Móvil (Botón Hamburguesa para pantallas pequeñas) */}
+        {/* Header Móvil */}
         <div className="lg:hidden bg-[#131927] border-b border-slate-800 p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button 
@@ -149,7 +162,7 @@ export default function DocentesLayout() {
             <span className="font-bold text-sm text-white">Progresa • Docentes</span>
           </div>
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-xs text-white">
-            MR
+            {iniciales}
           </div>
         </div>
 
@@ -160,8 +173,6 @@ export default function DocentesLayout() {
           {activeSection === 'asistencias' && <AsistenciasPanel />}
           {activeSection === 'horarios' && <HorariosPanel />}
           {activeSection === 'cursos' && <CursosPanel />}
-
-          
         </main>
 
       </div>
@@ -172,6 +183,9 @@ export default function DocentesLayout() {
 
 {/* VISTA INTERNA: PANEL DE CONTROL DOCENTE */}
 function PanelControlDocente() {
+  const usuario = JSON.parse(localStorage.getItem('usuarioLogueado') || '{}');
+  const especialidadMateria = usuario.especialidad || 'Especialidad General';
+
   return (
     <div className="space-y-6">
       
@@ -179,7 +193,7 @@ function PanelControlDocente() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
           <span className="text-xs text-slate-400 font-medium">Docente / Panel de Control</span>
-          <h1 className="text-xl font-bold text-white tracking-tight">Resumen del Día</h1>
+          <h1 className="text-xl font-bold text-white tracking-tight">{especialidadMateria}</h1>
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
