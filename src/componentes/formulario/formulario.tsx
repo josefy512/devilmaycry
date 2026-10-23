@@ -48,7 +48,7 @@ export default function LoginForm() {
     setError(null);
 
     if (!codigo.trim()) {
-      setError('Ingresa tu DNI.');
+      setError('Ingresa tu DNI o código.');
       return;
     }
     if (!password) {
@@ -59,51 +59,97 @@ export default function LoginForm() {
     setSubmitting(true);
 
     try {
-     if (role === 'alumno') {
-  const { data: alumno, error: dbError } = await supabase
-    .from('alumnos')
-    .select('*')
-    .eq('dni', codigo.trim())
-    .eq('password', password.trim())
-    .maybeSingle();
+      if (role === 'alumno') {
+        // 1. Buscar alumno
+        const { data: alumno, error: dbError } = await supabase
+          .from('alumnos')
+          .select('*')
+          .eq('dni', codigo.trim())
+          .eq('password', password.trim())
+          .maybeSingle();
 
-  if (dbError) throw dbError;
+        if (dbError) throw dbError;
 
-  if (!alumno) {
-    setError('Credenciales incorrectas o alumno no encontrado.');
-    setSubmitting(false);
-    return;
-  }
+        if (!alumno) {
+          setError('Credenciales incorrectas o alumno no encontrado.');
+          setSubmitting(false);
+          return;
+        }
 
-  console.log('ALUMNO:', alumno);
+        // 2. Buscar la institución del alumno
+        const { data: inst, error: instError } = await supabase
+          .from('instituciones')
+          .select('*')
+          .eq('id', alumno.institucion_id)
+          .maybeSingle();
 
-  // Buscar la institución por su código (ej: "ASM-01")
-  const { data: inst, error: instError } = await supabase
-    .from('instituciones')
-    .select('*')
-    .eq('id', alumno.institucion_id)
-    .maybeSingle();
+        const nombreInst =
+          inst?.nombre || inst?.name || 'Institución Educativa';
 
-  console.log('INSTITUCION:', inst, 'ERROR:', instError);
+        // 3. Guardar sesión de alumno
+        localStorage.setItem(
+          'usuarioLogueado',
+          JSON.stringify({
+            nombres: alumno.nombres,
+            apellidos: alumno.apellidos,
+            codigo: alumno.dni,
+            carrera: alumno.carrera,
+            institucionNombre: nombreInst,
+            rol: 'alumno',
+          })
+        );
 
-  const nombreInst =
-    inst?.nombre || inst?.name || 'Institución Educativa';
+        localStorage.setItem('progresa_student_section', 'panel');
+        window.location.reload();
 
-  localStorage.setItem(
-    'usuarioLogueado',
-    JSON.stringify({
-      nombres: alumno.nombres,
-      apellidos: alumno.apellidos,
-      codigo: alumno.dni,
-      carrera: alumno.carrera,
-      institucionNombre: nombreInst,
-      rol: 'alumno',
-    })
-  );
+      } else if (role === 'docente') {
+        // 1. Buscar al docente en la tabla 'docentes'
+        const { data: docente, error: docenteError } = await supabase
+          .from('docentes')
+          .select('*')
+          .eq('codigo', codigo.trim())
+          .eq('password', password.trim())
+          .maybeSingle();
 
-  localStorage.setItem('progresa_student_section', 'panel');
-  window.location.reload();
-} else {
+        if (docenteError) throw docenteError;
+
+        if (!docente) {
+          setError('Credenciales de docente incorrectas.');
+          setSubmitting(false);
+          return;
+        }
+
+        // 2. Buscar el nombre de su institución usando institucion_id
+        let nombreInst = 'Institución Educativa';
+        if (docente.institucion_id) {
+          const { data: inst } = await supabase
+            .from('instituciones')
+            .select('nombre, name')
+            .eq('id', docente.institucion_id)
+            .maybeSingle();
+
+          if (inst?.nombre || inst?.name) {
+            nombreInst = inst.nombre || inst.name;
+          }
+        }
+
+        // 3. Guardar sesión de docente
+        localStorage.setItem(
+          'usuarioLogueado',
+          JSON.stringify({
+            nombres: docente.nombres,
+            apellidos: docente.apellidos,
+            codigo: docente.codigo,
+            especialidad: docente.especialidad,
+            institucionNombre: nombreInst,
+            rol: 'docente',
+          })
+        );
+
+        localStorage.setItem('progresa_student_section', 'docentes');
+        window.location.reload();
+
+      } else {
         setError(`El acceso para el rol ${role} está en desarrollo.`);
         setSubmitting(false);
       }
