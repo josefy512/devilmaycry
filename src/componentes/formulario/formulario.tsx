@@ -48,7 +48,7 @@ export default function LoginForm() {
     setError(null);
 
     if (!codigo.trim()) {
-      setError('Ingresa tu DNI o código.');
+      setError('Ingresa tu DNI.');
       return;
     }
     if (!password) {
@@ -60,7 +60,7 @@ export default function LoginForm() {
 
     try {
       if (role === 'alumno') {
-        // 1. Buscar alumno
+        // 1. Buscar alumno por DNI
         const { data: alumno, error: dbError } = await supabase
           .from('alumnos')
           .select('*')
@@ -103,11 +103,11 @@ export default function LoginForm() {
         window.location.reload();
 
       } else if (role === 'docente') {
-        // 1. Buscar al docente en la tabla 'docentes'
+        // 1. Buscar al docente en la tabla 'docentes' por DNI
         const { data: docente, error: docenteError } = await supabase
           .from('docentes')
           .select('*')
-          .eq('codigo', codigo.trim())
+          .eq('dni', codigo.trim())
           .eq('password', password.trim())
           .maybeSingle();
 
@@ -139,7 +139,7 @@ export default function LoginForm() {
           JSON.stringify({
             nombres: docente.nombres,
             apellidos: docente.apellidos,
-            codigo: docente.codigo,
+            codigo: docente.dni,
             especialidad: docente.especialidad,
             institucionNombre: nombreInst,
             rol: 'docente',
@@ -251,11 +251,7 @@ export default function LoginForm() {
             <form onSubmit={handleSubmit} className="space-y-3.5" noValidate>
               <label className="block">
                 <span className="mb-1 block text-xs font-medium text-blue-100/90 sm:text-sm">
-                  {role === 'alumno'
-                    ? 'DNI'
-                    : role === 'docente'
-                    ? 'DNI / Código Docente'
-                    : 'DNI / Código de Personal'}
+                  DNI
                 </span>
                 <div className="group relative">
                   <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-300/60 transition-colors group-focus-within:text-white">
