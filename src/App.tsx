@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import FormularioPanel from './componentes/formulario/formulario';
-import EstudianteDashboard from './componentes/alumnos/alumnos'; // Ajusta la ruta si es necesario
+import EstudianteDashboard from './componentes/alumnos/alumnos'; // Ajusta según tu ruta de alumno
+import DocenteDashboard from './componentes/docente/docente';
 
 export default function App() {
   const [usuario, setUsuario] = useState<any>(null);
+  const [cargando, setCargando] = useState(true);
 
   // Al cargar, revisamos si ya había una sesión guardada
   useEffect(() => {
@@ -11,13 +13,24 @@ export default function App() {
     if (guardado) {
       setUsuario(JSON.parse(guardado));
     }
+    setCargando(false);
   }, []);
 
-  // Si hay usuario logueado y es alumno, mostramos su dashboard
-  if (usuario && usuario.rol === 'alumno') {
-    return <EstudianteDashboard />;
+  // Mientras verifica el localStorage para evitar parpadeos
+  if (cargando) {
+    return null; 
   }
 
-  // Si no, mostramos el login
-  return <FormularioPanel />;
+  // Si no hay usuario logueado, mostramos el login
+  if (!usuario || !usuario.nombres) {
+    return <FormularioPanel />;
+  }
+
+  // Si el usuario es docente, mostramos su panel
+  if (usuario.rol === 'docente') {
+    return <DocenteDashboard />;
+  }
+
+  // Por defecto, si es alumno:
+  return <EstudianteDashboard />;
 }
