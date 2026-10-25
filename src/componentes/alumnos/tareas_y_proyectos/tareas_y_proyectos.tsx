@@ -64,10 +64,10 @@ export default function TareasProyectos() {
       </div>
 
       {/* 2. Título Principal y Acciones */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-white">Tareas y Entregables</h1>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold text-white">Tareas y Entregables</h1>
+          <div className="flex flex-wrap items-center gap-2">
             <span className="px-2.5 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded-full text-xs font-semibold">
               5 Pendientes • 2 Urgentes
             </span>
@@ -77,7 +77,7 @@ export default function TareasProyectos() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-shrink-0">
           <button className="flex items-center gap-2 px-4 py-2 bg-[#131B2E] border border-slate-800 hover:border-slate-700 rounded-lg text-sm text-slate-300 hover:text-white transition-all">
             <Calendar className="w-4 h-4 text-blue-400" />
             <span>Calendario de Entregas</span>
