@@ -54,7 +54,7 @@ export default function CalendarioView() {
           <span>/</span>
           <span className="text-slate-100 font-medium">Calendario Académico y Eventos</span>
           <span className="px-3 py-0.5 bg-blue-500/10 text-blue-400 rounded-full font-semibold border border-blue-500/20">
-            • CICLO ACADÉMICO 2026-II
+            - CICLO ACADÉMICO 2026-II
           </span>
         </div>
 
@@ -181,10 +181,9 @@ export default function CalendarioView() {
       {/* 4. Estructura Principal: Calendario Visual (Izquierda) + Timeline de Vencimientos (Derecha) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-            {/* COLUMNA IZQUIERDA: Cuadrícula en PC / Vista de Lista Optimizada en Móvil */}
+        {/* COLUMNA IZQUIERDA: Cuadrícula en PC / Vista de Lista Optimizada en Móvil */}
         <div className="lg:col-span-8 bg-[#131927] border border-slate-800 rounded-2xl p-4 space-y-3">
           
-          {/* Cabecera dinámica: en móvil avisa que es la vista de agenda optimizada */}
           <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
               Octubre 2026 - Vista Interactiva
@@ -194,7 +193,7 @@ export default function CalendarioView() {
             </span>
           </div>
 
-          {/* 1. CUADRÍCULA TRADICIONAL (Solo se ve en Tablets y PCs - 'hidden sm:grid') */}
+          {/* 1. CUADRÍCULA TRADICIONAL (Solo en PC/Tablet) */}
           <div className="hidden sm:block space-y-2">
             <div className="grid grid-cols-7 text-center text-[11px] font-bold text-slate-500 uppercase tracking-wider py-2 border-b border-slate-800/80">
               <span>LUN</span><span>MAR</span><span>MIÉ</span><span>JUE</span><span>VIE</span><span>SÁB</span><span>DOM</span>
@@ -236,8 +235,7 @@ export default function CalendarioView() {
             </div>
           </div>
 
-          {/* 2. VISTA DE LISTA VERTICAL (Solo se ve en Celulares - 'sm:hidden') 
-              Esto evita el efecto 'sándwich' y da la experiencia de Google Calendar/Notion móvil */}
+          {/* 2. VISTA DE LISTA VERTICAL (Solo en Celulares) */}
           <div className="sm:hidden space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
             <p className="text-[11px] text-slate-400 mb-3 italic">
               Mostrando eventos organizados por día para una lectura fluida en tu smartphone:
@@ -280,7 +278,6 @@ export default function CalendarioView() {
               ))}
           </div>
 
-        </div>
         </div>
 
         {/* COLUMNA DERECHA: Próximos Vencimientos y Horizontes de Entrega (4 cols) */}
@@ -347,7 +344,7 @@ export default function CalendarioView() {
             </div>
 
             {/* Vencimiento 3: Asesoría */}
-            <div className="bg-[#131927] border border-slate-800 rounded-2xl p-4 space-y-3 transition-all">
+            <div className="bg-[#131927] border border-slate-800 hover:border-slate-700 rounded-2xl p-4 space-y-3 transition-all">
               <div className="flex items-center justify-between text-[11px]">
                 <span className="text-emerald-400 font-bold flex items-center gap-1">
                   <Video className="w-3.5 h-3.5" /> JUEVES 16 • 15:00 HRS
