@@ -16,7 +16,7 @@ import {
   Star 
 } from 'lucide-react';
 
-export default function TareasProyectos() {
+export default function TareasProyectos({ user }) {
   const [activeTab, setActiveTab] = useState('Pendientes');
   const [filterCourse, setFilterCourse] = useState('all');
   const [sortBy, setSortBy] = useState('urgent');
@@ -53,11 +53,11 @@ export default function TareasProyectos() {
           </button>
           <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
             <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs text-white">
-              AM
+              {user?.iniciales || 'U'}
             </div>
-            <div className="hidden sm:block text-xs">
-              <p className="font-semibold text-slate-200">Alex Morgan</p>
-              <p className="text-slate-500">Ciclo VII</p>
+            <div className="hidden sm:block text-[11px]">
+              <p className="font-semibold text-slate-200">{user?.nombre_completo || 'Estudiante Progresa'}</p>
+              <p className="text-slate-500">{user?.ciclo || 'Ciclo Académico'}</p>
             </div>
           </div>
         </div>
