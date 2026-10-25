@@ -156,9 +156,23 @@ export default function CalendarioView() {
             </button>
           ))}
 
-          <button className="px-3 py-1.5 bg-purple-950/40 text-purple-300 border border-purple-800/60 rounded-lg font-medium flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-purple-400">Feriados y Recesos</span> 3
+          <button
+            onClick={() => setActiveFilter('Feriados')}
+            className={`px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 ${
+              activeFilter === 'Feriados'
+                ? 'bg-purple-600 text-white shadow'
+                : 'bg-purple-950/40 text-purple-300 border border-purple-800/60 hover:border-purple-700'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-purple-400 flex-shrink-0"></span>
+            <span>Feriados y Recesos</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+              activeFilter === 'Feriados' ? 'bg-purple-700 text-white' : 'bg-purple-900/60 text-purple-300'
+            }`}>
+              3
+            </span>
           </button>
+          
         </div>
 
         {/* Selector de Vista (Mes / Semana / Agenda) */}
