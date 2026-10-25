@@ -196,49 +196,37 @@ export default function CalendarioView() {
           </div>
 
           {/* Días del Mes Grid */}
-          <div className="grid grid-cols-7 gap-1.5 auto-rows-fr">
-            {diasMes.map((item, index) => (
-              <div 
-                key={index}
-                className={`min-h-[90px] p-2 rounded-xl border flex flex-col justify-between transition-all ${
-                  item.hoy 
-                    ? 'bg-blue-950/20 border-blue-500/60 shadow-lg shadow-blue-500/10' 
-                    : item.evento || item.color
-                      ? (item.color || 'bg-[#0B0F17] border-slate-800')
-                      : item.otroMes 
-                        ? 'bg-[#0B0F17]/40 border-slate-900 text-slate-600 opacity-40' 
-                        : 'bg-[#0B0F17] border-slate-800/80 text-slate-300 hover:border-slate-700'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className={`text-xs font-semibold ${item.hoy ? 'text-blue-400 font-bold bg-blue-500/20 px-1.5 py-0.2 rounded' : ''}`}>
-                    {item.dia}
-                  </span>
-                  {item.hoy && <span className="text-[9px] font-bold text-blue-400">HOY</span>}
-                  {item.evento === 'FER' && <span className="text-[9px] font-bold text-purple-400">FER</span>}
-                  {item.evento === 'RECESO' && <span className="text-[9px] font-bold text-purple-400">RECESO</span>}
-                </div>
+            <div className="grid grid-cols-7 gap-1 auto-rows-fr">
+                {diasMes.map((item, index) => (
+                  <div 
+                 key={index}
+                  className={`min-h-[60px] sm:min-h-[90px] p-1.5 sm:p-2 rounded-xl border flex flex-col justify-between transition-all ${
+                    // ... tus condiciones de colores y estados ...
+                    }`}
+                           >
+                  <div className="flex items-center justify-between">
+                   <span className={`text-[11px] sm:text-xs font-semibold ...`}>
+                   {item.dia}
+                   </span>
+                {/* Indicadores resumidos para móvil */}
+              {item.hoy && <span className="text-[8px] sm:text-[9px] font-bold text-blue-400">HOY</span>}
+               </div>
 
-                <div className="space-y-1">
-                  {item.titulo && (
-                    <div className="text-[10px] font-medium truncate px-1 py-0.5 rounded bg-black/30">
-                      {item.titulo}
-                    </div>
-                  )}
-                  {item.eventosList && item.eventosList.map((ev, i) => (
-                    <div key={i} className="text-[10px] font-medium text-blue-300 truncate bg-blue-500/10 px-1 py-0.5 rounded">
-                      {ev}
-                    </div>
-                  ))}
-                  {item.evento && !['FER', 'RECESO'].includes(item.evento) && (
-                    <div className="text-[10px] text-slate-400 truncate">
-                      {item.evento}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
+                  {/* Textos: Ocultar o simplificar en celular muy pequeño, mostrar completo en sm: */}
+            <div className="space-y-1">
+        {item.titulo && (
+          <div className="hidden sm:block text-[10px] font-medium truncate px-1 py-0.5 rounded bg-black/30">
+            {item.titulo}
           </div>
+        )}
+        {/* En móvil mostramos un punto indicador si hay evento para no saturar */}
+        {(item.titulo || item.evento || item.eventosList) && (
+          <div className="sm:hidden w-1.5 h-1.5 rounded-full bg-blue-400 mx-auto mt-1" />
+        )}
+        </div>
+      </div>
+    ))}
+    </div>
         </div>
 
         {/* COLUMNA DERECHA: Próximos Vencimientos y Horizontes de Entrega (4 cols) */}
