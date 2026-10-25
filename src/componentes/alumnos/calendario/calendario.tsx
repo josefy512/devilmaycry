@@ -181,55 +181,106 @@ export default function CalendarioView() {
       {/* 4. Estructura Principal: Calendario Visual (Izquierda) + Timeline de Vencimientos (Derecha) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* COLUMNA IZQUIERDA: Cuadrícula del Mes (8 cols) */}
+            {/* COLUMNA IZQUIERDA: Cuadrícula en PC / Vista de Lista Optimizada en Móvil */}
         <div className="lg:col-span-8 bg-[#131927] border border-slate-800 rounded-2xl p-4 space-y-3">
           
-          {/* Cabecera de Días de la Semana */}
-          <div className="grid grid-cols-7 text-center text-[11px] font-bold text-slate-500 uppercase tracking-wider py-2 border-b border-slate-800/80">
-            <span>LUN</span>
-            <span>MAR</span>
-            <span>MIÉ</span>
-            <span>JUE</span>
-            <span>VIE</span>
-            <span>SÁB</span>
-            <span>DOM</span>
+          {/* Cabecera dinámica: en móvil avisa que es la vista de agenda optimizada */}
+          <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              Octubre 2026 - Vista Interactiva
+            </span>
+            <span className="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 sm:hidden">
+              Modo Móvil Adaptado
+            </span>
           </div>
 
-                  {/* Días del Mes Grid */}
-<div className="grid grid-cols-7 gap-1.5 auto-rows-fr">
-  {diasMes.map((item, index) => (
-    <div 
-      key={index}
-      className={`min-h-[60px] sm:min-h-[90px] p-1.5 sm:p-2 rounded-xl border flex flex-col justify-between transition-all ${
-        item.hoy 
-          ? 'bg-blue-950/20 border-blue-500/60 shadow-lg shadow-blue-500/10' 
-          : item.evento || item.color
-            ? (item.color || 'bg-[#0B0F17] border-slate-800')
-            : item.otroMes 
-              ? 'bg-[#0B0F17]/40 border-slate-900 text-slate-600 opacity-40' 
-              : 'bg-[#0B0F17] border-slate-800/80 text-slate-300 hover:border-slate-700'
-      }`}
-    >
-      <div className="flex items-center justify-between">
-        <span className={`text-[11px] sm:text-xs font-semibold ${item.hoy ? 'text-blue-400 font-bold bg-blue-500/20 px-1.5 py-0.2 rounded' : ''}`}>
-          {item.dia}
-        </span>
-        {item.hoy && <span className="text-[8px] sm:text-[9px] font-bold text-blue-400">HOY</span>}
-      </div>
-
-      <div className="space-y-1">
-        {item.titulo && (
-          <div className="hidden sm:block text-[10px] font-medium truncate px-1 py-0.5 rounded bg-black/30">
-            {item.titulo}
+          {/* 1. CUADRÍCULA TRADICIONAL (Solo se ve en Tablets y PCs - 'hidden sm:grid') */}
+          <div className="hidden sm:block space-y-2">
+            <div className="grid grid-cols-7 text-center text-[11px] font-bold text-slate-500 uppercase tracking-wider py-2 border-b border-slate-800/80">
+              <span>LUN</span><span>MAR</span><span>MIÉ</span><span>JUE</span><span>VIE</span><span>SÁB</span><span>DOM</span>
+            </div>
+            <div className="grid grid-cols-7 gap-1.5 auto-rows-fr">
+              {diasMes.map((item, index) => (
+                <div 
+                  key={index}
+                  className={`min-h-[90px] p-2 rounded-xl border flex flex-col justify-between transition-all ${
+                    item.hoy 
+                      ? 'bg-blue-950/20 border-blue-500/60 shadow-lg shadow-blue-500/10' 
+                      : item.evento || item.color
+                        ? (item.color || 'bg-[#0B0F17] border-slate-800')
+                        : item.otroMes 
+                          ? 'bg-[#0B0F17]/40 border-slate-900 text-slate-600 opacity-40' 
+                          : 'bg-[#0B0F17] border-slate-800/80 text-slate-300 hover:border-slate-700'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className={`text-xs font-semibold ${item.hoy ? 'text-blue-400 font-bold bg-blue-500/20 px-1.5 py-0.2 rounded' : ''}`}>
+                      {item.dia}
+                    </span>
+                    {item.hoy && <span className="text-[9px] font-bold text-blue-400">HOY</span>}
+                  </div>
+                  <div className="space-y-1">
+                    {item.titulo && (
+                      <div className="text-[10px] font-medium truncate px-1 py-0.5 rounded bg-black/30 text-slate-200">
+                        {item.titulo}
+                      </div>
+                    )}
+                    {item.eventosList && item.eventosList.map((ev, i) => (
+                      <div key={i} className="text-[10px] font-medium text-blue-300 truncate bg-blue-500/10 px-1 py-0.5 rounded">
+                        {ev}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        )}
-        {(item.titulo || item.evento || item.eventosList) && (
-          <div className="sm:hidden w-1.5 h-1.5 rounded-full bg-blue-400 mx-auto mt-1" />
-        )}
-      </div>
-    </div>
-  ))}
-</div>
+
+          {/* 2. VISTA DE LISTA VERTICAL (Solo se ve en Celulares - 'sm:hidden') 
+              Esto evita el efecto 'sándwich' y da la experiencia de Google Calendar/Notion móvil */}
+          <div className="sm:hidden space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
+            <p className="text-[11px] text-slate-400 mb-3 italic">
+              Mostrando eventos organizados por día para una lectura fluida en tu smartphone:
+            </p>
+            {diasMes
+              .filter(item => !item.otroMes && (item.titulo || item.eventosList || item.hoy || item.evento))
+              .map((item, index) => (
+                <div 
+                  key={index}
+                  className={`p-3 rounded-xl border flex items-center justify-between gap-3 ${
+                    item.hoy 
+                      ? 'bg-blue-950/30 border-blue-500/50' 
+                      : 'bg-[#0B0F17] border-slate-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-lg flex flex-col items-center justify-center font-bold text-xs ${
+                      item.hoy ? 'bg-blue-600 text-white' : 'bg-[#1C2538] text-slate-300'
+                    }`}>
+                      <span>{item.dia}</span>
+                      <span className="text-[8px] font-normal uppercase">Oct</span>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-white">
+                        {item.titulo || item.evento || (item.hoy ? 'Día Actual - Sin eventos mayores' : 'Actividad programada')}
+                      </h4>
+                      {item.eventosList && (
+                        <p className="text-[10px] text-blue-400 mt-0.5">
+                          {item.eventosList.join(' • ')}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {item.hoy && (
+                    <span className="text-[9px] font-bold px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded-full">
+                      HOY
+                    </span>
+                  )}
+                </div>
+              ))}
+          </div>
+
+        </div>
         </div>
 
         {/* COLUMNA DERECHA: Próximos Vencimientos y Horizontes de Entrega (4 cols) */}
