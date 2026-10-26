@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FutPage from './FUT/fut';
+import { supabase } from '../../supabaseClient';
 import { 
   Search, 
   Bell, 
@@ -14,55 +15,55 @@ import {
   FileSpreadsheet,
   BookOpen,
   Calendar,
-  X
+  X,
+  ExternalLink,
+  Loader2
 } from 'lucide-react';
 
 export default function DocumentosView() {
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [showFutModal, setShowFutModal] = useState(false);
 
-  const silabos = [
-    {
-      id: '1',
-      curso: 'Cálculo II',
-      codigo: 'MAT-204',
-      docente: 'Prof. Dr. Ramiro Valdivia',
-      creditos: '5 CRÉDITOS',
-      tamano: '2.4 MB (PDF)',
-      actualizado: 'Ciclo 2026-II',
-      iconColor: 'bg-[#18233C] text-blue-400 border-blue-500/20'
-    },
-    {
-      id: '2',
-      curso: 'Resistencia de Materiales',
-      codigo: 'CIV-301',
-      docente: 'Ing. Martha Córdova',
-      creditos: '4 CRÉDITOS',
-      tamano: '3.1 MB (PDF)',
-      actualizado: 'Ciclo 2026-II',
-      iconColor: 'bg-[#271E38] text-purple-400 border-purple-500/20'
-    },
-    {
-      id: '3',
-      curso: 'Física II (Termodinámica)',
-      codigo: 'FIS-102',
-      docente: 'Lic. Javier Mendoza',
-      creditos: '5 CRÉDITOS',
-      tamano: '1.9 MB (PDF)',
-      actualizado: 'Ciclo 2026-II',
-      iconColor: 'bg-[#2E2419] text-amber-400 border-amber-500/20'
-    },
-    {
-      id: '4',
-      curso: 'Topografía Aplicada',
-      codigo: 'CIV-205',
-      docente: 'Ing. Daniel Morales',
-      creditos: '5 CRÉDITOS',
-      tamano: '4.2 MB (PDF)',
-      actualizado: 'Ciclo 2026-II',
-      iconColor: 'bg-[#152B28] text-emerald-400 border-emerald-500/20'
+  // Estados para los cursos y sílabos desde Supabase
+  const [silabosDinamicos, setSilabosDinamicos] = useState([]);
+  const [loadingSilabos, setLoadingSilabos] = useState(true);
+
+  // Cargar cursos y sus sílabos reales desde la base de datos
+  useEffect(() => {
+    async function fetchSilabosSupabase() {
+      try {
+        setLoadingSilabos(true);
+        const { data, error } = await supabase
+          .from('cursos')
+          .select('*');
+
+        if (error) {
+          console.error('Error al obtener sílabos:', error);
+        } else if (data) {
+          const mapeados = data.map((c, index) => ({
+            id: c.id || String(index + 1),
+            curso: c.nombre_curso || c.nombre || 'Curso sin nombre',
+            codigo: c.codigo || 'INV-401',
+            docente: c.profesor || 'Docente asignado',
+            creditos: `${c.creditos || 4} CRÉDITOS`,
+            tamano: 'PDF Oficial',
+            actualizado: 'Ciclo 2026-II',
+            silaboUrl: c.silabo_url || null,
+            iconColor: index % 2 === 0 
+              ? 'bg-[#18233C] text-blue-400 border-blue-500/20' 
+              : 'bg-[#271E38] text-purple-400 border-purple-500/20'
+          }));
+          setSilabosDinamicos(mapeados);
+        }
+      } catch (err) {
+        console.error('Error inesperado:', err);
+      } finally {
+        setLoadingSilabos(false);
+      }
     }
-  ];
+
+    fetchSilabosSupabase();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0B0F17] text-slate-100 p-6 space-y-6 font-sans">
@@ -211,45 +212,64 @@ export default function DocumentosView() {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-white">Sílabos de Cursos Matriculados</h3>
             <span className="text-xs text-slate-400 bg-[#131927] px-2.5 py-1 rounded-md border border-slate-800">
-              5 Asignaturas
+              {silabosDinamicos.length} Asignaturas
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {silabos.map((item) => (
-              <div 
-                key={item.id}
-                className="bg-[#131927] border border-slate-800 hover:border-slate-700 rounded-2xl p-4 space-y-3 flex flex-col justify-between transition-all"
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className={`w-9 h-9 rounded-xl border flex items-center justify-center font-bold text-xs ${item.iconColor}`}>
-                      <FileText className="w-4 h-4" />
+          {loadingSilabos ? (
+            <div className="flex flex-col items-center justify-center py-12 bg-[#131927] border border-slate-800 rounded-2xl gap-3 text-slate-400">
+              <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+              <p className="text-xs font-medium">Sincronizando sílabos desde Supabase...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {silabosDinamicos.map((item) => (
+                <div 
+                  key={item.id}
+                  className="bg-[#131927] border border-slate-800 hover:border-slate-700 rounded-2xl p-4 space-y-3 flex flex-col justify-between transition-all"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className={`w-9 h-9 rounded-xl border flex items-center justify-center font-bold text-xs ${item.iconColor}`}>
+                        <FileText className="w-4 h-4" />
+                      </div>
+                      <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+                        {item.creditos}
+                      </span>
                     </div>
-                    <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
-                      {item.creditos}
-                    </span>
+
+                    <div>
+                      <h4 className="font-bold text-slate-100 text-sm">{item.curso}</h4>
+                      <p className="text-xs text-slate-400 mt-0.5">{item.codigo} • {item.docente}</p>
+                    </div>
                   </div>
 
-                  <div>
-                    <h4 className="font-bold text-slate-100 text-sm">{item.curso}</h4>
-                    <p className="text-xs text-slate-400 mt-0.5">{item.codigo} • {item.docente}</p>
+                  <div className="space-y-2 pt-2 border-t border-slate-800/80">
+                    <p className="text-[11px] text-slate-500">
+                      {item.actualizado} • {item.tamano}
+                    </p>
+
+                    {item.silaboUrl ? (
+                      <a 
+                        href={item.silaboUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="w-full flex items-center justify-center gap-2 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold transition-colors shadow-md"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Descargar Sílabo (PDF)</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ) : (
+                      <div className="w-full py-2 bg-slate-800/50 text-slate-500 rounded-xl text-xs font-medium text-center cursor-not-allowed">
+                        Publicación pendiente del docente
+                      </div>
+                    )}
                   </div>
                 </div>
-
-                <div className="space-y-2 pt-2 border-t border-slate-800/80">
-                  <p className="text-[11px] text-slate-500">
-                    Actualizado {item.actualizado} • {item.tamano}
-                  </p>
-
-                  <button className="w-full flex items-center justify-center gap-2 py-2 bg-[#1C2538] hover:bg-slate-800 text-slate-200 rounded-xl text-xs font-medium transition-colors">
-                    <Download className="w-3.5 h-3.5 text-rose-400" />
-                    <span>Descargar Sílabo</span>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Derecha: Formularios y Trámites - FUT (4 cols) */}
@@ -275,7 +295,6 @@ export default function DocumentosView() {
               </p>
             </div>
 
-            {/* Ventajas del trámite digital */}
             <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 text-xs text-slate-300 space-y-2">
               <p className="font-semibold text-slate-200">VENTAJAS DEL TRÁMITE DIGITAL:</p>
               <ul className="space-y-1.5 text-slate-400">
@@ -294,7 +313,6 @@ export default function DocumentosView() {
               </ul>
             </div>
 
-            {/* Botón Principal para Abrir el FUT Digital */}
             <button
               type="button"
               onClick={() => setShowFutModal(true)}
