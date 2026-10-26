@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabaseClient'; // Asegúrate de verificar la ruta de tu cliente Supabase
+import { supabase } from '../../../supabaseClient';
 import { 
   Search, 
   MapPin, 
