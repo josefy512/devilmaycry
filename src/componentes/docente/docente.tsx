@@ -75,8 +75,8 @@ export default function DocentesLayout() {
         }`}
       >
         <div className="space-y-6">
-          {/* Perfil del Docente en el Header del Sidebar */}
-          <div className="flex items-center justify-between pb-4 border-b border-slate-800/80">
+          {/* Perfil del Docente en el Header del Sidebar (Con position relative para anclar la X) */}
+          <div className="relative flex items-center justify-between pb-4 border-b border-slate-800/80 pr-8">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-sm text-white shadow-md shadow-blue-500/20">
                 {iniciales}
@@ -86,9 +86,10 @@ export default function DocentesLayout() {
                 <p className="text-[11px] text-slate-400 truncate">{correoDocente}</p>
               </div>
             </div>
+            {/* Botón X posicionado limpiamente en la esquina */}
             <button 
               onClick={() => setMobileMenuOpen(false)}
-              className="lg:hidden p-1 text-slate-400 hover:text-white"
+              className="lg:hidden absolute right-0 top-1 p-1.5 bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -153,12 +154,15 @@ export default function DocentesLayout() {
         {/* Header Móvil */}
         <div className="lg:hidden bg-[#131927] border-b border-slate-800 p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setMobileMenuOpen(true)}
-              className="p-2 text-slate-400 hover:text-white bg-[#0B0F17] rounded-lg border border-slate-800"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
+            {/* Oculta las 3 barras si el menú móvil ya está abierto */}
+            {!mobileMenuOpen && (
+              <button 
+                onClick={() => setMobileMenuOpen(true)}
+                className="p-2 text-slate-400 hover:text-white bg-[#0B0F17] rounded-lg border border-slate-800 transition-colors"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+            )}
             <span className="font-bold text-sm text-white">Progresa • Docentes</span>
           </div>
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-xs text-white">
