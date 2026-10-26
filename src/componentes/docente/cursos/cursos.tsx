@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from "../../supabaseClient";
+import { supabase } from './supabaseClient'; // O la ruta correcta que estás usando
 import { 
   Search, 
   MapPin, 
   Clock, 
   Users, 
   Mail, 
-  FileText, 
   ListOrdered, 
   Award, 
   MoreVertical, 
   Filter,
   Loader2,
-  Upload
+  Upload,
+  FileCheck,
+  X,
+  ExternalLink
 } from 'lucide-react';
 
 export default function MisCursosPanel() {
@@ -20,47 +22,111 @@ export default function MisCursosPanel() {
   const [cursos, setCursos] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Cargar cursos asignados al docente Adolfo Ventocilla desde Supabase
-  useEffect(() => {
-    async function fetchCursos() {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('cursos')
-          .select('*')
-          .ilike('profesor', '%Adolfo Ventocilla%');
+  // Estados para el Modal de Subida de Sílabo
+  const [cursoSeleccionado, setCursoSeleccionado] = useState(null);
+  const [archivoPDF, setArchivoPDF] = useState(null);
+  const [subiendo, setSubiendo] = useState(false);
+  const [mensajeSubida, setMensajeSubida] = useState('');
 
-        if (error) {
-          console.error('Error al obtener cursos:', error);
-        } else if (data) {
-          // Mapeamos los campos reales de la BD a la interfaz
-          const cursosFormateados = data.map((c) => ({
-            id: c.id,
-            codigo: c.codigo || 'INV-401',
-            grupo: 'Grupo 1A • Turno Mañana',
-            nombre: c.nombre_curso || c.nombre || 'Curso sin nombre',
-            ubicacion: 'Aula 302 • Pabellón de Innovación',
-            horario: 'Lun y Mié 10:00 – 12:00 PM',
-            matriculados: 35,
-            avanceSilabo: 0,
-            semana: 'Semana 1 de 16',
-            delegado: {
-              nombre: 'Alumno Delegado',
-              avatar: 'AD',
-              email: 'delegado@progresa.edu.pe'
-            }
-          }));
-          setCursos(cursosFormateados);
-        }
-      } catch (err) {
-        console.error('Error inesperado:', err);
-      } finally {
-        setLoading(false);
+  // 1. Cargar cursos asignados
+  const fetchCursos = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('cursos')
+        .select('*')
+        .ilike('profesor', '%Adolfo Ventocilla%');
+
+      if (error) {
+        console.error('Error al obtener cursos:', error);
+      } else if (data) {
+        const cursosFormateados = data.map((c) => ({
+          id: c.id,
+          codigo: c.codigo || 'INV-401',
+          grupo: 'Grupo 1A • Turno Mañana',
+          nombre: c.nombre_curso || c.nombre || 'Curso sin nombre',
+          ubicacion: 'Aula 302 • Pabellón de Innovación',
+          horario: 'Lun y Mié 10:00 – 12:00 PM',
+          matriculados: 35,
+          avanceSilabo: c.silabo_url ? 100 : 0,
+          semana: c.silabo_url ? 'Sílabo Publicado' : 'Semana 1 de 16',
+          silaboUrl: c.silabo_url || null,
+          delegado: {
+            nombre: 'Alumno Delegado',
+            avatar: 'AD',
+            email: 'delegado@progresa.edu.pe'
+          }
+        }));
+        setCursos(cursosFormateados);
       }
+    } catch (err) {
+      console.error('Error inesperado:', err);
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     fetchCursos();
   }, []);
+
+  // 2. Función para subir el PDF a Supabase Storage
+  const handleSubirSilabo = async (e) => {
+    e.preventDefault();
+    if (!archivoPDF || !cursoSeleccionado) return;
+
+    try {
+      setSubiendo(true);
+      setMensajeSubida('');
+
+      // Nombre único para el archivo en el bucket 'silabos'
+      const fileExt = archivoPDF.name.split('.').pop();
+      const fileName = `${cursoSeleccionado.codigo}_silabo_${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      // a) Subir a Supabase Storage (Bucket: 'silabos')
+      const { data: storageData, error: storageError } = await supabase
+        .storage
+        .from('silabos')
+        .upload(filePath, archivoPDF, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (storageError) throw storageError;
+
+      // b) Obtener URL pública del archivo cargado
+      const { data: publicUrlData } = supabase
+        .storage
+        .from('silabos')
+        .getPublicUrl(filePath);
+
+      const publicUrl = publicUrlData.publicUrl;
+
+      // c) Actualizar la columna 'silabo_url' en la tabla 'cursos'
+      const { error: dbError } = await supabase
+        .from('cursos')
+        .update({ silabo_url: publicUrl })
+        .eq('id', cursoSeleccionado.id);
+
+      if (dbError) throw dbError;
+
+      setMensajeSubida('¡Sílabo publicado con éxito!');
+      await fetchCursos();
+      
+      setTimeout(() => {
+        setCursoSeleccionado(null);
+        setArchivoPDF(null);
+        setMensajeSubida('');
+      }, 1500);
+
+    } catch (error) {
+      console.error('Error al subir el sílabo:', error);
+      setMensajeSubida(`Error: ${error.message || 'No se pudo subir el archivo'}`);
+    } finally {
+      setSubiendo(false);
+    }
+  };
 
   const cursosFiltrados = cursos.filter(c => 
     c.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -70,67 +136,56 @@ export default function MisCursosPanel() {
   return (
     <div className="space-y-6 text-slate-100 font-sans">
       
-      {/* 1. Header del Módulo y Buscador Superior */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-5">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#333333] pb-5">
         <div className="space-y-1">
-          <span className="text-[11px] font-bold text-emerald-400 tracking-wider uppercase flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="text-[11px] font-bold text-[#1ed760] tracking-wider uppercase flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#1ed760] animate-pulse"></span>
             PORTAL DOCENTE ACTIVO
           </span>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">
             Mis Cursos Asignados
           </h1>
-          <p className="text-xs text-slate-400">
-            Ciclo Académico 2026-II • <strong className="text-slate-200">{cursos.length} Asignatura(s) activa(s)</strong>
+          <p className="text-xs text-[#b3b3b3]">
+            Ciclo Académico 2026-II • <strong className="text-white">{cursos.length} Asignatura(s) activa(s)</strong>
           </p>
         </div>
 
-        {/* Buscador de Cursos */}
+        {/* Buscador */}
         <div className="flex items-center gap-2">
           <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#73777c]" />
             <input 
               type="text" 
-              placeholder="Buscar por código o nombre de curso..." 
+              placeholder="Buscar por código o nombre..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#131927] border border-slate-800 rounded-xl pl-9 pr-9 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
+              className="w-full bg-[#1f1f1f] border border-[#333333] rounded-full pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-[#1ed760] transition-colors"
             />
           </div>
-
-          <button className="p-2.5 bg-[#131927] border border-slate-800 hover:border-slate-700 rounded-xl text-slate-400 hover:text-white transition-colors flex items-center gap-2 text-xs font-semibold">
-            <Filter className="w-4 h-4" />
-            <span className="hidden sm:inline">Filtrar</span>
-          </button>
         </div>
       </div>
 
-      {/* Indicador de Carga */}
+      {/* Cargando o Grilla */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-16 text-slate-400 gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
-          <p className="text-xs font-semibold">Cargando cursos asignados desde Supabase...</p>
-        </div>
-      ) : cursosFiltrados.length === 0 ? (
-        <div className="p-8 bg-[#131927] border border-slate-800 rounded-2xl text-center text-slate-400">
-          No se encontraron cursos asignados para este docente.
+        <div className="flex flex-col items-center justify-center py-16 text-[#b3b3b3] gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-[#1ed760]" />
+          <p className="text-xs font-semibold">Cargando cursos desde Supabase...</p>
         </div>
       ) : (
-        /* 2. Grilla de Tarjetas de Cursos */
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {cursosFiltrados.map((curso) => (
             <div 
               key={curso.id}
-              className="bg-[#131927] border border-slate-800 hover:border-slate-700/80 rounded-2xl p-5 space-y-5 transition-all shadow-lg shadow-black/20"
+              className="bg-[#121212] border border-[#1f1f1f] hover:border-[#333333] rounded-[6px] p-5 space-y-5 transition-all shadow-lg"
             >
-              {/* Cabecera de la Tarjeta */}
-              <div className="flex items-start justify-between gap-3 border-b border-slate-800/80 pb-3">
+              <div className="flex items-start justify-between gap-3 border-b border-[#1f1f1f] pb-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 bg-slate-800/80 text-slate-300 text-[10px] font-mono font-bold rounded">
+                    <span className="px-2.5 py-0.5 bg-[#1f1f1f] text-white text-[10px] font-mono font-bold rounded-[2px]">
                       {curso.codigo}
                     </span>
-                    <span className="px-2.5 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold rounded">
+                    <span className="px-2.5 py-0.5 bg-[#1ed760]/10 text-[#1ed760] border border-[#1ed760]/20 text-[10px] font-bold rounded-[2px]">
                       {curso.grupo}
                     </span>
                   </div>
@@ -138,115 +193,121 @@ export default function MisCursosPanel() {
                     {curso.nombre}
                   </h2>
                 </div>
-
-                <button className="p-1.5 text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 rounded-lg transition-colors">
-                  <MoreVertical className="w-4 h-4" />
-                </button>
               </div>
 
-              {/* Ubicación y Horario */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-[#0B0F17] border border-slate-800/80 rounded-xl text-xs">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-slate-800/60 text-slate-400 rounded-lg">
-                    <MapPin className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-slate-500 uppercase font-bold">Ubicación</p>
-                    <p className="font-semibold text-slate-200">{curso.ubicacion}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-slate-800/60 text-slate-400 rounded-lg">
-                    <Clock className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-slate-500 uppercase font-bold">Horario</p>
-                    <p className="font-semibold text-slate-200">{curso.horario}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Métricas: Matriculados & Avance del Sílabo */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-[10px] text-slate-500 uppercase font-bold flex items-center justify-between">
-                    <span>Matriculados</span>
-                    <Users className="w-3.5 h-3.5 text-emerald-400" />
-                  </p>
-                  <p className="text-xl font-extrabold text-white mt-1">
-                    {curso.matriculados} <span className="text-xs font-normal text-slate-400">alumnos activos</span>
-                  </p>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between text-[10px] uppercase font-bold">
-                    <span className="text-slate-500">Avance del Sílabo</span>
-                    <span className="text-emerald-400 font-extrabold">{curso.avanceSilabo}%</span>
-                  </div>
-                  <p className="text-xs font-semibold text-slate-300 mt-1">{curso.semana}</p>
-                  <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden mt-1.5">
-                    <div 
-                      className="h-full bg-blue-500 rounded-full" 
-                      style={{ width: `${curso.avanceSilabo}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Datos del Delegado de Aula */}
-              <div className="p-3 bg-[#0B0F17] border border-slate-800/80 rounded-xl flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-[10px] text-white">
-                    {curso.delegado.avatar}
-                  </div>
-                  <div>
-                    <p className="font-bold text-white text-xs">{curso.delegado.nombre}</p>
-                    <p className="text-[10px] text-slate-500 font-medium">DELEGADO DE AULA</p>
-                  </div>
-                </div>
-
-                <a 
-                  href={`mailto:${curso.delegado.email}`}
-                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700/80 text-slate-200 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5"
-                >
-                  <Mail className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Contactar</span>
-                </a>
-              </div>
-
-              {/* Botones de Acción Directa */}
-              <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800/80">
+              {/* Botones de Acción */}
+              <div className="grid grid-cols-2 gap-3 pt-2">
                 <button 
-                  onClick={() => alert(`Subir Sílabo para el curso ${curso.nombre}`)}
-                  className="py-2.5 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-400 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
+                  onClick={() => setCursoSeleccionado(curso)}
+                  className="py-2.5 bg-[#ffffff] hover:bg-[#c5c5c5] text-[#000000] rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5"
                 >
-                  <Upload className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="hidden sm:inline">Sílabo</span>
-                  <span className="sm:hidden">Sílabo</span>
+                  <Upload className="w-4 h-4 text-[#000000]" />
+                  <span>{curso.silaboUrl ? 'Actualizar Sílabo' : 'Subir Sílabo PDF'}</span>
                 </button>
 
-                <button 
-                  onClick={() => alert(`Lista de alumnos de ${curso.nombre}`)}
-                  className="py-2.5 bg-[#0B0F17] hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
-                >
-                  <ListOrdered className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="hidden sm:inline">Lista Alumn...</span>
-                  <span className="sm:hidden">Lista</span>
-                </button>
-
-                <button 
-                  onClick={() => alert(`Navegando a Calificaciones`)}
-                  className="py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-600/20 flex items-center justify-center gap-1.5"
-                >
-                  <Award className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Calificac...</span>
-                  <span className="sm:hidden">Notas</span>
-                </button>
+                {curso.silaboUrl ? (
+                  <a 
+                    href={curso.silaboUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="py-2.5 bg-[#1f1f1f] hover:bg-[#292929] border border-[#1ed760]/50 text-[#1ed760] rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <FileCheck className="w-4 h-4 text-[#1ed760]" />
+                    <span>Ver Sílabo (PDF)</span>
+                    <ExternalLink className="w-3 h-3 text-[#1ed760]" />
+                  </a>
+                ) : (
+                  <div className="py-2.5 bg-[#1f1f1f] text-[#73777c] rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 cursor-not-allowed">
+                    <span>Sin Sílabo</span>
+                  </div>
+                )}
               </div>
-
             </div>
           ))}
+        </div>
+      )}
+
+      {/* MODAL DE SUBIDA ESTILO SPOTIFY */}
+      {cursoSeleccionado && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#121212] border border-[#333333] rounded-[6px] max-w-md w-full p-6 space-y-5 shadow-2xl relative">
+            
+            <button 
+              onClick={() => {
+                setCursoSeleccionado(null);
+                setArchivoPDF(null);
+                setMensajeSubida('');
+              }}
+              className="absolute top-4 right-4 text-[#b3b3b3] hover:text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div>
+              <span className="text-[10px] font-bold text-[#1ed760] tracking-wider uppercase">
+                {cursoSeleccionado.codigo}
+              </span>
+              <h3 className="text-xl font-bold text-white mt-1">
+                Subir Sílabo de Asignatura
+              </h3>
+              <p className="text-xs text-[#b3b3b3] mt-0.5">
+                {cursoSeleccionado.nombre}
+              </p>
+            </div>
+
+            <form onSubmit={handleSubirSilabo} className="space-y-4">
+              <div className="border-2 border-dashed border-[#333333] hover:border-[#1ed760] rounded-[6px] p-6 text-center transition-colors bg-[#000000]">
+                <input 
+                  type="file" 
+                  accept="application/pdf"
+                  onChange={(e) => setArchivoPDF(e.target.files[0])}
+                  className="hidden" 
+                  id="silabo-input"
+                  required
+                />
+                <label htmlFor="silabo-input" className="cursor-pointer flex flex-col items-center gap-2">
+                  <Upload className="w-8 h-8 text-[#1ed760]" />
+                  <span className="text-xs font-semibold text-white">
+                    {archivoPDF ? archivoPDF.name : 'Haz clic para seleccionar el archivo PDF'}
+                  </span>
+                  <span className="text-[10px] text-[#73777c]">
+                    Solo formato .pdf (Máximo 10MB)
+                  </span>
+                </label>
+              </div>
+
+              {mensajeSubida && (
+                <p className={`text-xs text-center font-bold ${mensajeSubida.includes('Error') ? 'text-red-400' : 'text-[#1ed760]'}`}>
+                  {mensajeSubida}
+                </p>
+              )}
+
+              <div className="flex items-center justify-end gap-3 pt-2 border-t border-[#1f1f1f]">
+                <button
+                  type="button"
+                  onClick={() => setCursoSeleccionado(null)}
+                  className="px-4 py-2 text-xs font-semibold text-[#b3b3b3] hover:text-white transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={!archivoPDF || subiendo}
+                  className="px-5 py-2 bg-[#ffffff] hover:bg-[#c5c5c5] disabled:bg-[#333333] disabled:text-[#73777c] text-[#000000] font-bold text-xs rounded-full transition-all flex items-center gap-2"
+                >
+                  {subiendo ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Subiendo...</span>
+                    </>
+                  ) : (
+                    <span>Guardar y Publicar</span>
+                  )}
+                </button>
+              </div>
+            </form>
+
+          </div>
         </div>
       )}
 
