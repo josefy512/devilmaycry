@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient'; // O la ruta correcta que estás usando
+import { supabase } from '../../../supabaseClient';
 import { 
   Search, 
   MapPin, 
