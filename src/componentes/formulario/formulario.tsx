@@ -17,12 +17,12 @@ import {
 } from 'lucide-react';
 
 // Añadimos 'director' a los roles disponibles
-type Role = 'alumno' | 'docente' | 'director';
+type Role = 'alumno' | 'docente' | 'personal';
 
 const roles: { id: Role; label: string; icon: React.ReactNode }[] = [
   { id: 'alumno', label: 'Alumno', icon: <User className="h-4 w-4" /> },
   { id: 'docente', label: 'Docente', icon: <GraduationCap className="h-4 w-4" /> },
-  { id: 'director', label: 'Director', icon: <ShieldCheck className="h-4 w-4" /> },
+  { id: 'personal', label: 'Personal', icon: <ShieldCheck className="h-4 w-4" /> },
 ];
 
 export default function LoginForm() {
@@ -152,7 +152,7 @@ export default function LoginForm() {
         localStorage.setItem('progresa_student_section', 'docentes');
         window.location.reload();
 
-      } else if (role === 'director') {
+      } else if (role === 'personal') {
         // 1. Buscar al director en la tabla 'directores' por DNI
         const { data: director, error: dirError } = await supabase
           .from('directores')
@@ -169,11 +169,19 @@ export default function LoginForm() {
           return;
         }
 
-        // 2. Obtener el nombre de la institución relacionada
-        const nombreInst = 
-          director.instituciones?.nombre || 
-          director.instituciones?.name || 
-          'Institución Educativa';
+        // 2. Buscar el nombre de su institución de forma segura
+        let nombreInst = 'Institución Educativa';
+        if (director.institucion_id) {
+          const { data: inst } = await supabase
+            .from('instituciones')
+            .select('nombre, name')
+            .eq('id', director.institucion_id)
+            .maybeSingle();
+
+          if (inst?.nombre || inst?.name) {
+            nombreInst = inst.nombre || inst.name;
+          }
+        }
 
         // 3. Guardar sesión de director
         localStorage.setItem(
