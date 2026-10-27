@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import FormularioPanel from './formulario'; // Ajusta la ruta de tu login si es necesario
+import FormularioPanel from './formulario/formulario';
 import EstudianteDashboard from './componentes/alumnos/alumnos';
 import DocenteDashboard from './componentes/docente/docente';
 import DirectoresLayout from './componentes/direccion/direccion';
