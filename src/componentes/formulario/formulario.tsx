@@ -11,16 +11,18 @@ import {
   WifiOff,
   User,
   Briefcase,
+  ShieldCheck,
   CloudOff,
   Cloud,
 } from 'lucide-react';
 
-type Role = 'alumno' | 'docente' | 'personal';
+// Añadimos 'director' a los roles disponibles
+type Role = 'alumno' | 'docente' | 'director';
 
 const roles: { id: Role; label: string; icon: React.ReactNode }[] = [
   { id: 'alumno', label: 'Alumno', icon: <User className="h-4 w-4" /> },
   { id: 'docente', label: 'Docente', icon: <GraduationCap className="h-4 w-4" /> },
-  { id: 'personal', label: 'Personal', icon: <Briefcase className="h-4 w-4" /> },
+  { id: 'director', label: 'Director', icon: <ShieldCheck className="h-4 w-4" /> },
 ];
 
 export default function LoginForm() {
@@ -77,7 +79,7 @@ export default function LoginForm() {
         }
 
         // 2. Buscar la institución del alumno
-        const { data: inst, error: instError } = await supabase
+        const { data: inst } = await supabase
           .from('instituciones')
           .select('*')
           .eq('id', alumno.institucion_id)
@@ -119,7 +121,7 @@ export default function LoginForm() {
           return;
         }
 
-        // 2. Buscar el nombre de su institución usando institucion_id
+        // 2. Buscar el nombre de su institución
         let nombreInst = 'Institución Educativa';
         if (docente.institucion_id) {
           const { data: inst } = await supabase
@@ -150,9 +152,45 @@ export default function LoginForm() {
         localStorage.setItem('progresa_student_section', 'docentes');
         window.location.reload();
 
-      } else {
-        setError(`El acceso para el rol ${role} está en desarrollo.`);
-        setSubmitting(false);
+      } else if (role === 'director') {
+        // 1. Buscar al director en la tabla 'directores' por DNI
+        const { data: director, error: dirError } = await supabase
+          .from('directores')
+          .select('*, instituciones(nombre, name)')
+          .eq('dni', codigo.trim())
+          .eq('password', password.trim())
+          .maybeSingle();
+
+        if (dirError) throw dirError;
+
+        if (!director) {
+          setError('Credenciales de director incorrectas.');
+          setSubmitting(false);
+          return;
+        }
+
+        // 2. Obtener el nombre de la institución relacionada
+        const nombreInst = 
+          director.instituciones?.nombre || 
+          director.instituciones?.name || 
+          'Institución Educativa';
+
+        // 3. Guardar sesión de director
+        localStorage.setItem(
+          'usuarioLogueado',
+          JSON.stringify({
+            nombres: director.nombres,
+            apellidos: director.apellidos,
+            dni: director.dni,
+            email: director.email,
+            cargo: director.cargo,
+            institucion_id: director.institucion_id,
+            institucionNombre: nombreInst,
+            rol: 'director',
+          })
+        );
+
+        window.location.reload();
       }
     } catch (err) {
       console.error('Error al conectar:', err);

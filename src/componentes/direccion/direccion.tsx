@@ -32,7 +32,7 @@ export default function DirectoresLayout() {
   const usuario = JSON.parse(localStorage.getItem('usuarioLogueado') || '{}');
   const nombreDirector = `${usuario.nombres || 'Dr. Ricardo'} ${usuario.apellidos || 'Méndez'}`.trim();
   const correoDirector = usuario.email || 'director@progresa.edu.pe';
-  const institucionNombre = usuario.institucion_nombre || 'I.E. Emblemática San Martín';
+  const institucionNombre = usuario.institucionNombre || usuario.institucion_nombre || 'I.E. Institución Educativa';
   const iniciales = `${usuario.nombres?.[0] || 'D'}${usuario.apellidos?.[0] || 'R'}`.toUpperCase();
 
   const navigationItems = [
