@@ -126,7 +126,7 @@ export default function LoginForm() {
         if (docente.institucion_id) {
           const { data: inst } = await supabase
             .from('instituciones')
-            .select('nombre, name')
+            .select('*')
             .eq('id', docente.institucion_id)
             .maybeSingle();
 
@@ -156,7 +156,7 @@ export default function LoginForm() {
         // 1. Buscar al director en la tabla 'directores' por DNI
         const { data: director, error: dirError } = await supabase
           .from('directores')
-          .select('*, instituciones(nombre, name)')
+          .select('*')
           .eq('dni', codigo.trim())
           .eq('password', password.trim())
           .maybeSingle();
@@ -174,7 +174,7 @@ export default function LoginForm() {
         if (director.institucion_id) {
           const { data: inst } = await supabase
             .from('instituciones')
-            .select('nombre, name')
+            .select('*')
             .eq('id', director.institucion_id)
             .maybeSingle();
 
