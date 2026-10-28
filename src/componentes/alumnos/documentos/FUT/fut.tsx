@@ -141,13 +141,6 @@ export const FutPage: React.FC = () => {
     }
   };
 
-    // 2. Guardarlo en el localStorage compartido de la demo
-    const futsExistentes = JSON.parse(localStorage.getItem('progresa_futs_demo') || '[]');
-    localStorage.setItem('progresa_futs_demo', JSON.stringify([nuevoFUT, ...futsExistentes]));
-
-    setCargoData({ ticket, fechaHora });
-    setIsSubmitted(true);
-
   const handleDownloadPDF = () => {
     // Simulación de descarga de PDF con sello digital
     window.print();
