@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../supabaseClient';
+import { supabase } from "../supabaseClient";
 import CalificacionesPanel from './calificaciones/calificaciones';
 import AsistenciasPanel from "./asistencias/asistencias";
 import HorariosPanel from "./horarios/horarios";
