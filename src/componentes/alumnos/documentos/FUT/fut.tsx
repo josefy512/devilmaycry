@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../../../supabaseClient';
+import { supabase } from '../supabaseClient';
 import { 
   FileText, 
   Send, 
@@ -147,7 +147,6 @@ export const FutPage: React.FC = () => {
 
     setCargoData({ ticket, fechaHora });
     setIsSubmitted(true);
-  };
 
   const handleDownloadPDF = () => {
     // Simulación de descarga de PDF con sello digital
