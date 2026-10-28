@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../../../supabaseClient';
 import { 
   Users, 
   CheckCircle2, 
@@ -38,6 +39,31 @@ interface Estudiante {
 export default function AsistenciasPanel() {
   const [activeFilter, setActiveFilter] = useState('Todos');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Estados para FUTs dinámicos desde Supabase
+  const [futsAprobados, setFutsAprobados] = useState<any[]>([]);
+  const [cargandoFuts, setCargandoFuts] = useState(false);
+
+  // Cargar FUTs aprobados por la Directora desde Supabase
+  useEffect(() => {
+    const cargarFutsAprobados = async () => {
+      setCargandoFuts(true);
+      const { data, error } = await supabase
+        .from('futs')
+        .select('*')
+        .eq('estado', 'aprobado')
+        .order('fecha_solicitud', { ascending: false });
+
+      if (error) {
+        console.error('Error al cargar FUTs aprobados:', error);
+      } else if (data) {
+        setFutsAprobados(data);
+      }
+      setCargandoFuts(false);
+    };
+
+    cargarFutsAprobados();
+  }, []);
 
   // Estado inicial simulado de la lista de estudiantes
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([
@@ -438,7 +464,7 @@ export default function AsistenciasPanel() {
 
         </div>
 
-        {/* COLUMNA DERECHA: Monitor DPI + FUTs + Exportar (4 cols) */}
+        {/* COLUMNA DERECHA: Monitor DPI + FUTs Dinámicos + Exportar (4 cols) */}
         <div className="lg:col-span-4 space-y-6">
           
           {/* Panel Monitor DPI (Desaprobado por Inasistencias) */}
@@ -496,7 +522,7 @@ export default function AsistenciasPanel() {
             </div>
           </div>
 
-          {/* Solicitudes FUT Justificaciones del Día */}
+          {/* Solicitudes FUT Justificaciones del Día (DINÁMICO DESDE SUPABASE) */}
           <div className="bg-[#131927] border border-slate-800 rounded-2xl p-5 space-y-3">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
@@ -504,35 +530,37 @@ export default function AsistenciasPanel() {
                 <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Solicitudes FUT</h3>
               </div>
               <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 text-[10px] font-bold rounded">
-                2 Casos
+                {futsAprobados.length} Casos
               </span>
             </div>
 
-            <div className="space-y-2.5">
-              
-              <div className="p-3 bg-[#0B0F17] border border-slate-800 rounded-xl space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-xs">Elena Díaz Vargas</span>
-                  <span className="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold">Validado</span>
-                </div>
-                <p className="text-[10px] text-slate-400 leading-relaxed">
-                  FUT #4105 • Descanso Médico EsSalud acreditado por Bienestar Institucional.
-                </p>
-              </div>
-
-              <div className="p-3 bg-[#0B0F17] border border-slate-800 rounded-xl space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-xs">Roberto Sánchez P.</span>
-                  <span className="text-[9px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded font-bold">Pendiente Firma</span>
-                </div>
-                <p className="text-[10px] text-slate-400 leading-relaxed">
-                  FUT #4122 • Delegación Deportiva Universitaria (Torneo Interfacultades).
-                </p>
-                <button className="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-[11px] font-bold transition-colors">
-                  Aprobar y Registrar [J]
-                </button>
-              </div>
-
+            <div className="space-y-2.5 max-h-80 overflow-y-auto">
+              {cargandoFuts ? (
+                <p className="text-xs text-slate-500 text-center py-4">Cargando trámites de Supabase...</p>
+              ) : futsAprobados.length === 0 ? (
+                <p className="text-xs text-slate-500 text-center py-4">No hay trámites FUT aprobados por el momento.</p>
+              ) : (
+                futsAprobados.map((fut) => (
+                  <div key={fut.id} className="p-3 bg-[#0B0F17] border border-slate-800 rounded-xl space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-white text-xs">{fut.nombres_apellidos}</span>
+                      <span className="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold">Validado / Aprobado</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      <strong className="text-blue-400">{fut.codigo}</strong> • {fut.sumilla}
+                    </p>
+                    <div className="pt-1 flex items-center justify-between text-[9px] text-slate-500">
+                      <span>{fut.carrera}</span>
+                      <button 
+                        onClick={() => alert(`Fundamento del alumno: ${fut.fundamento}`)}
+                        className="text-blue-400 hover:underline font-semibold"
+                      >
+                        Ver Detalle
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
