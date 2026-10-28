@@ -92,28 +92,53 @@ export const FutPage: React.FC = () => {
     }, 600);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.sumilla || !formData.fundamento) {
       alert('Por favor completa la sumilla y el fundamento del pedido.');
       return;
     }
 
+    setIsSaving(true);
+
     const now = new Date();
     const ticket = `FUT-${now.getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
-    const fechaHora = `${now.toLocaleDateString('es-PE')} a las ${now.toLocaleTimeString()}`;
+    const fechaHora = `${now.toLocaleDateString('es-PE')} a las ${now.toLocaleTimeString('es-PE')}`;
 
-    // 1. Crear el objeto del FUT para que la Directora lo reciba
+    // 1. Objeto a enviar a Supabase con todos los datos del alumno
     const nuevoFUT = {
-      id: Date.now().toString(),
       codigo: ticket,
-      estudiante: formData.nombresApellidos || 'Estudiante Anónimo',
+      nombres_apellidos: formData.nombresApellidos || 'Estudiante Anónimo',
+      dni: formData.dni || '00000000',
+      telefono: formData.telefono || 'Sin celular',
       carrera: 'Computación e Informática',
-      asunto: formData.sumilla,
+      sumilla: formData.sumilla,
       fundamento: formData.fundamento,
-      fecha: now.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' }),
-      estado: 'pendiente' as const,
+      estado: 'pendiente'
     };
+
+    try {
+      // 2. Insertar en la tabla 'futs' de Supabase
+      const { error } = await supabase
+        .from('futs')
+        .insert([nuevoFUT]);
+
+      if (error) {
+        console.error('Error al guardar en Supabase:', error);
+        alert('Ocurrió un error al enviar el FUT a la base de datos.');
+        setIsSaving(false);
+        return;
+      }
+
+      // 3. Éxito
+      setCargoData({ ticket, fechaHora });
+      setIsSaving(false);
+      setIsSubmitted(true);
+    } catch (err) {
+      console.error('Error de red:', err);
+      setIsSaving(false);
+    }
+  };
 
     // 2. Guardarlo en el localStorage compartido de la demo
     const futsExistentes = JSON.parse(localStorage.getItem('progresa_futs_demo') || '[]');
