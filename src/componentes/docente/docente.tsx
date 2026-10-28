@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../../supabaseClient';
 import CalificacionesPanel from './calificaciones/calificaciones';
 import AsistenciasPanel from "./asistencias/asistencias";
 import HorariosPanel from "./horarios/horarios";
@@ -220,6 +221,30 @@ function PanelControlDocente({ isDarkMode }: { isDarkMode: boolean }) {
   const usuario = JSON.parse(localStorage.getItem('usuarioLogueado') || '{}');
   const especialidadMateria = usuario.especialidad || 'Especialidad General';
 
+  // 🟢 Estado para guardar los FUTs aprobados desde Supabase
+  const [futsAprobados, setFutsAprobados] = useState<any[]>([]);
+  const [cargandoFuts, setCargandoFuts] = useState(false);
+
+  useEffect(() => {
+    const obtenerFutsAprobados = async () => {
+      setCargandoFuts(true);
+      const { data, error } = await supabase
+        .from('futs')
+        .select('*')
+        .eq('estado', 'aprobado') // Solo los aprobados por la Directora
+        .order('fecha_solicitud', { ascending: false });
+
+      if (error) {
+        console.error('Error al cargar FUTs aprobados para el docente:', error);
+      } else if (data) {
+        setFutsAprobados(data);
+      }
+      setCargandoFuts(false);
+    };
+
+    obtenerFutsAprobados();
+  }, []);
+
   const cardStyle = `border rounded-2xl p-5 transition-all ${
     isDarkMode ? 'bg-[#121722] border-slate-800/80 text-slate-100' : 'bg-white border-slate-200 text-slate-800 shadow-xs'
   }`;
@@ -400,48 +425,45 @@ function PanelControlDocente({ isDarkMode }: { isDarkMode: boolean }) {
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${isDarkMode ? 'divide-slate-800/60 text-slate-300' : 'divide-slate-100 text-slate-700'}`}>
-                  <tr className="transition-colors">
-                    <td className="py-3 px-3 font-medium flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold text-white">AG</div>
-                      <span>Ana García</span>
-                    </td>
-                    <td className="py-3 px-3">Entrega de Proyecto Final (Pase FUT)</td>
-                    <td className="py-3 px-3 text-slate-400">Hoy, 9:00 AM</td>
-                    <td className="py-3 px-3">
-                      <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-md font-semibold text-[10px]">
-                        Pendiente FUT #4092
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-right">
-                      <button className={`p-1.5 border rounded-lg transition-colors ${
-                        isDarkMode ? 'bg-[#0B0F17] border-slate-800 text-slate-400 hover:text-white' : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
-                      }`}>
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
+                {futsAprobados.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-4 text-center text-slate-400 text-xs">
+                      {cargandoFuts ? 'Cargando trámites aprobados...' : 'No hay FUTs aprobados por dirección disponibles.'}
                     </td>
                   </tr>
-
-                  <tr className="transition-colors">
-                    <td className="py-3 px-3 font-medium flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold text-white">CR</div>
-                      <span>Carlos Ruiz</span>
-                    </td>
-                    <td className="py-3 px-3">Justificante Médico (Salud)</td>
-                    <td className="py-3 px-3 text-slate-400">Ayer</td>
-                    <td className="py-3 px-3">
-                      <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-md font-semibold text-[10px]">
-                        Aprobado
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-right">
-                      <button className={`p-1.5 border rounded-lg transition-colors ${
-                        isDarkMode ? 'bg-[#0B0F17] border-slate-800 text-slate-400 hover:text-white' : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
-                      }`}>
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
+                ) : (
+                  futsAprobados.map((fut) => (
+                    <tr key={fut.id} className="transition-colors">
+                      <td className="py-3 px-3 font-medium flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-[10px] font-bold text-white">
+                          {fut.nombres_apellidos ? fut.nombres_apellidos.substring(0, 2).toUpperCase() : 'AL'}
+                        </div>
+                        <span>{fut.nombres_apellidos}</span>
+                      </td>
+                      <td className="py-3 px-3">{fut.sumilla}</td>
+                      <td className="py-3 px-3 text-slate-400">
+                        {new Date(fut.fecha_solicitud || Date.now()).toLocaleDateString('es-PE')}
+                      </td>
+                      <td className="py-3 px-3">
+                        <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-md font-semibold text-[10px]">
+                          Aprobado por Dirección
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-right">
+                        <button 
+                          onClick={() => alert(`Fundamento del alumno: ${fut.fundamento}`)}
+                          className={`p-1.5 border rounded-lg transition-colors ${
+                            isDarkMode ? 'bg-[#0B0F17] border-slate-800 text-slate-400 hover:text-white' : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
+                          }`}
+                          title="Ver detalle"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
               </table>
             </div>
           </div>
