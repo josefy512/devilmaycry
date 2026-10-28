@@ -202,7 +202,7 @@ export default function LoginForm() {
       }
     } catch (err) {
       console.error('Error al conectar:', err);
-      setError('Error de conexión con la base de datos.');
+      setError('Error de conexión');
       setSubmitting(false);
     }
   };
