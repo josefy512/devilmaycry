@@ -101,7 +101,23 @@ export const FutPage: React.FC = () => {
 
     const now = new Date();
     const ticket = `FUT-${now.getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
-    const fechaHora = `${now.toLocaleDateString('es-PE')} a las ${now.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}`;
+    const fechaHora = `${now.toLocaleDateString('es-PE')} a las ${now.toLocaleTimeString()}`;
+
+    // 1. Crear el objeto del FUT para que la Directora lo reciba
+    const nuevoFUT = {
+      id: Date.now().toString(),
+      codigo: ticket,
+      estudiante: formData.nombresApellidos || 'Estudiante Anónimo',
+      carrera: 'Computación e Informática',
+      asunto: formData.sumilla,
+      fundamento: formData.fundamento,
+      fecha: now.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' }),
+      estado: 'pendiente' as const,
+    };
+
+    // 2. Guardarlo en el localStorage compartido de la demo
+    const futsExistentes = JSON.parse(localStorage.getItem('progresa_futs_demo') || '[]');
+    localStorage.setItem('progresa_futs_demo', JSON.stringify([nuevoFUT, ...futsExistentes]));
 
     setCargoData({ ticket, fechaHora });
     setIsSubmitted(true);
