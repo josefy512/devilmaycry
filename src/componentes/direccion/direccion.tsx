@@ -50,38 +50,70 @@ export default function DirectoresLayout() {
   // Estado inicial de FUTs cargando desde el localStorage compartido para la demo
   const [futs, setFuts] = useState<FUT[]>([]);
 
-  useEffect(() => {
-    const futsGuardados = localStorage.getItem('progresa_futs_demo');
-    if (futsGuardados) {
-      try {
-        setFuts(JSON.parse(futsGuardados));
-      } catch (e) {
-        console.error("Error al leer los FUTs", e);
-      }
-    } else {
-      // Datos por defecto si está vacío
-      const futsIniciales: FUT[] = [
-        { id: '1', codigo: 'FUT-2026-089', estudiante: 'Sosa Ortiz, Valentina', carrera: 'Computación e Informática', asunto: 'Justificación de inasistencia por salud', fecha: '24 Oct 2026', estado: 'pendiente' },
-        { id: '2', codigo: 'FUT-2026-090', estudiante: 'Ramos Paredes, Mateo', carrera: 'Administración de Empresas', asunto: 'Solicitud de certificado de estudios', fecha: '25 Oct 2026', estado: 'pendiente' },
-      ];
-      setFuts(futsIniciales);
-      localStorage.setItem('progresa_futs_demo', JSON.stringify(futsIniciales));
+  // 🟢 PEGAR ESTO:
+  const [cargandoFuts, setCargandoFuts] = useState(false);
+
+  const obtenerFutsDesdeSupabase = async () => {
+    setCargandoFuts(true);
+    const { data, error } = await supabase
+      .from('futs')
+      .select('*')
+      .order('fecha_solicitud', { ascending: false });
+
+    if (error) {
+      console.error('Error al cargar FUTs desde Supabase:', error);
+    } else if (data) {
+      const futsMapeados = data.map((f: any) => ({
+        id: f.id,
+        codigo: f.codigo,
+        estudiante: f.nombres_apellidos,
+        carrera: f.carrera,
+        asunto: f.sumilla,
+        fecha: new Date(f.fecha_solicitud || Date.now()).toLocaleDateString('es-PE', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+        }),
+        estado: f.estado,
+      }));
+      setFuts(futsMapeados);
     }
-  }, []);
-
-  const actualizarFutsEnStorage = (nuevosFuts: FUT[]) => {
-    setFuts(nuevosFuts);
-    localStorage.setItem('progresa_futs_demo', JSON.stringify(nuevosFuts));
+    setCargandoFuts(false);
   };
 
-  const handleAprobarFUT = (id: string) => {
-    const actualizados = futs.map((f) => (f.id === id ? { ...f, estado: 'aprobado' as const } : f));
-    actualizarFutsEnStorage(actualizados);
+  useEffect(() => {
+    obtenerFutsDesdeSupabase();
+  }, [activeSection]);
+
+  const handleAprobarFUT = async (id: string) => {
+    setFuts((prev) => prev.map((f) => (f.id === id ? { ...f, estado: 'aprobado' } : f)));
+
+    const { error } = await supabase
+      .from('futs')
+      .update({
+        estado: 'aprobado',
+        fecha_aprobacion: new Date().toISOString(),
+      })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error al aprobar el FUT en Supabase:', error);
+      obtenerFutsDesdeSupabase();
+    }
   };
 
-  const handleRechazarFUT = (id: string) => {
-    const actualizados = futs.map((f) => (f.id === id ? { ...f, estado: 'rechazado' as const } : f));
-    actualizarFutsEnStorage(actualizados);
+  const handleRechazarFUT = async (id: string) => {
+    setFuts((prev) => prev.map((f) => (f.id === id ? { ...f, estado: 'rechazado' } : f)));
+
+    const { error } = await supabase
+      .from('futs')
+      .update({ estado: 'rechazado' })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error al rechazar el FUT:', error);
+      obtenerFutsDesdeSupabase();
+    }
   };
 
   const handleCerrarSesion = () => {
