@@ -16,8 +16,7 @@ import {
   Menu,
   X,
   UserCheck,
-  Clock,
-  Sparkles,
+  Clock
 } from 'lucide-react';
 
 type Section = 'dashboard' | 'futs' | 'alumnos' | 'docentes' | 'resoluciones';
@@ -450,7 +449,7 @@ export default function DirectoresLayout() {
 
           {activeSection !== 'dashboard' && activeSection !== 'futs' && (
             <div className="flex h-64 flex-col items-center justify-center rounded-[6px] bg-[#121212] p-8 text-center">
-              <Sparkles className="mb-3 h-8 w-8 text-[#1ed760]" />
+              
               <h2 className="text-base font-bold text-[#ffffff]">Módulo de {navItems.find(i => i.id === activeSection)?.label}</h2>
               <p className="mt-1 max-w-sm text-xs text-[#b3b3b3]">
                 Este panel está listo para consulta directa de la base de datos de {institucionNombre}.
