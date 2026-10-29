@@ -19,20 +19,52 @@ import {
   ExternalLink,
   Loader2
 } from 'lucide-react';
- 
+
 export default function DocumentosView() {
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [showFutModal, setShowFutModal] = useState(false);
- 
+
   const [silabosDinamicos, setSilabosDinamicos] = useState([]);
   const [loadingSilabos, setLoadingSilabos] = useState(true);
- 
+
+  // --- Control del modal FUT: atrás del celular/PC, Esc y clic fuera ---
+  const abrirFut = () => {
+    window.history.pushState({ futModal: true }, '');
+    setShowFutModal(true);
+  };
+
+  const cerrarFut = () => {
+    if (window.history.state && window.history.state.futModal) {
+      window.history.back(); // dispara popstate y cierra el modal
+    } else {
+      setShowFutModal(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!showFutModal) return;
+
+    const onPopState = () => setShowFutModal(false);
+    const onKeyDown = (e) => { if (e.key === 'Escape') cerrarFut(); };
+
+    window.addEventListener('popstate', onPopState);
+    window.addEventListener('keydown', onKeyDown);
+    const overflowPrevio = document.body.style.overflow;
+    document.body.style.overflow = 'hidden'; // evita scroll del fondo
+
+    return () => {
+      window.removeEventListener('popstate', onPopState);
+      window.removeEventListener('keydown', onKeyDown);
+      document.body.style.overflow = overflowPrevio;
+    };
+  }, [showFutModal]);
+
   useEffect(() => {
     async function fetchSilabosSupabase() {
       try {
         setLoadingSilabos(true);
         const { data, error } = await supabase.from('cursos').select('*');
- 
+
         if (error) {
           console.error('Error al obtener sílabos:', error);
         } else if (data) {
@@ -58,20 +90,20 @@ export default function DocumentosView() {
         setLoadingSilabos(false);
       }
     }
- 
+
     fetchSilabosSupabase();
   }, []);
- 
+
   const categorias = [
     { id: 'Todos', label: 'Todos (18)' },
     { id: 'Academicos', label: 'Académicos' },
     { id: 'Tramites', label: 'Trámites' },
     { id: 'Reglamentos', label: 'Reglamentos' },
   ];
- 
+
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#0B0F17] text-slate-100 p-3 sm:p-6 space-y-5 sm:space-y-6 font-sans">
- 
+
       {/* 1. Header superior */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 border-b border-slate-800/80 pb-4">
         <div className="flex items-center gap-2 sm:gap-3 text-sm text-slate-400">
@@ -79,7 +111,7 @@ export default function DocumentosView() {
           <span>/</span>
           <span className="text-slate-100 font-medium">Documentos</span>
         </div>
- 
+
         <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto">
           <div className="relative flex-1 min-w-0 md:w-80 md:flex-none">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -94,7 +126,7 @@ export default function DocumentosView() {
           </button>
         </div>
       </div>
- 
+
       {/* 2. Título y acciones */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="min-w-0">
@@ -108,14 +140,14 @@ export default function DocumentosView() {
             Consulta, descarga y gestiona tus certificados, fichas académicas y formatos oficiales con autenticación y firma digital.
           </p>
         </div>
- 
+
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full lg:w-auto">
           <button className="flex items-center justify-center gap-2 px-4 py-2 bg-[#131927] border border-slate-800 hover:border-slate-700 rounded-lg text-sm text-slate-300 hover:text-white transition-all">
             <Upload className="w-4 h-4 text-slate-400" />
             <span>Subir Documento</span>
           </button>
           <button
-            onClick={() => setShowFutModal(true)}
+            onClick={abrirFut}
             className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-all shadow-lg shadow-blue-600/20"
           >
             <Plus className="w-4 h-4" />
@@ -123,7 +155,7 @@ export default function DocumentosView() {
           </button>
         </div>
       </div>
- 
+
       {/* 3. Filtros y estado del servidor */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         {/* El scroll horizontal queda SOLO dentro de este contenedor */}
@@ -144,7 +176,7 @@ export default function DocumentosView() {
             ))}
           </div>
         </div>
- 
+
         <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
           <span>Servidor de firmas:</span>
           <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
@@ -153,7 +185,7 @@ export default function DocumentosView() {
           </span>
         </div>
       </div>
- 
+
       {/* 4. Ficha de matrícula */}
       <div className="bg-[#131927] border border-slate-800 rounded-2xl p-4 sm:p-6 relative overflow-hidden">
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-5 sm:gap-6">
@@ -171,7 +203,7 @@ export default function DocumentosView() {
               <p className="text-xs text-slate-400">
                 Periodo Lectivo 2026-II • Emitido por Secretaría General con Código de Verificación Electrónica (CVE).
               </p>
- 
+
               <div className="grid grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pt-3 text-xs">
                 <div className="min-w-0">
                   <p className="text-slate-500 font-medium">Estudiante:</p>
@@ -194,7 +226,7 @@ export default function DocumentosView() {
               </div>
             </div>
           </div>
- 
+
           <div className="flex flex-col min-[420px]:flex-row items-stretch gap-2 sm:gap-3 w-full xl:w-auto xl:shrink-0">
             <button className="flex-1 xl:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1C2538] hover:bg-[#25314A] border border-slate-700/60 rounded-xl text-xs font-semibold text-slate-200 transition-colors">
               <Eye className="w-4 h-4 text-slate-400" />
@@ -207,10 +239,10 @@ export default function DocumentosView() {
           </div>
         </div>
       </div>
- 
+
       {/* 5. Sílabos + Formularios */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
- 
+
         {/* Sílabos */}
         <div className="lg:col-span-8 space-y-4 min-w-0">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -219,7 +251,7 @@ export default function DocumentosView() {
               {silabosDinamicos.length} Asignaturas
             </span>
           </div>
- 
+
           {loadingSilabos ? (
             <div className="flex flex-col items-center justify-center py-12 px-4 bg-[#131927] border border-slate-800 rounded-2xl gap-3 text-slate-400 text-center">
               <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
@@ -241,18 +273,18 @@ export default function DocumentosView() {
                         {item.creditos}
                       </span>
                     </div>
- 
+
                     <div className="min-w-0">
                       <h4 className="font-bold text-slate-100 text-sm break-words">{item.curso}</h4>
                       <p className="text-xs text-slate-400 mt-0.5 break-words">{item.codigo} • {item.docente}</p>
                     </div>
                   </div>
- 
+
                   <div className="space-y-2 pt-2 border-t border-slate-800/80">
                     <p className="text-[11px] text-slate-500">
                       {item.actualizado} • {item.tamano}
                     </p>
- 
+
                     {item.silaboUrl ? (
                       <a
                         href={item.silaboUrl}
@@ -275,13 +307,13 @@ export default function DocumentosView() {
             </div>
           )}
         </div>
- 
+
         {/* Formularios y trámites */}
         <div className="lg:col-span-4 space-y-4 min-w-0">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-white">Formularios y Trámites</h3>
           </div>
- 
+
           <div className="bg-[#131927] border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4">
             <div className="flex items-center justify-between gap-2">
               <div className="w-10 h-10 shrink-0 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
@@ -291,14 +323,14 @@ export default function DocumentosView() {
                 Vigencia 2026 • V.4
               </span>
             </div>
- 
+
             <div>
               <h4 className="font-bold text-white text-sm">FUT - Formulario Único de Trámite</h4>
               <p className="text-xs text-slate-400 mt-1 leading-relaxed">
                 Requerido para convalidaciones, rectificación de matrícula, certificados de egresado y justificaciones médicas.
               </p>
             </div>
- 
+
             <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 text-xs text-slate-300 space-y-2">
               <p className="font-semibold text-slate-200">VENTAJAS DEL TRÁMITE DIGITAL:</p>
               <ul className="space-y-1.5 text-slate-400">
@@ -314,10 +346,10 @@ export default function DocumentosView() {
                 ))}
               </ul>
             </div>
- 
+
             <button
               type="button"
-              onClick={() => setShowFutModal(true)}
+              onClick={abrirFut}
               className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/20 transition-all text-sm"
             >
               <FileText className="w-4 h-4" />
@@ -326,10 +358,10 @@ export default function DocumentosView() {
           </div>
         </div>
       </div>
- 
+
       {/* 6. Historial vs Reglamentos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 pt-2">
- 
+
         {/* Historial */}
         <div className="space-y-3 min-w-0">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -338,7 +370,7 @@ export default function DocumentosView() {
               Ver histórico completo <ChevronRight className="w-3 h-3" />
             </button>
           </div>
- 
+
           <div className="space-y-3">
             <div className="bg-[#131927] border border-slate-800 rounded-xl p-4 flex flex-col min-[420px]:flex-row min-[420px]:items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-3 min-w-0">
@@ -353,12 +385,12 @@ export default function DocumentosView() {
                   <span className="inline-block mt-1 text-[9px] text-slate-500 bg-slate-800 px-1.5 py-0.5 rounded">Firma Digital FNMT</span>
                 </div>
               </div>
- 
+
               <button className="shrink-0 px-3 py-2 bg-[#1C2538] hover:bg-slate-800 text-slate-300 rounded-lg text-xs font-medium transition-colors">
                 Descargar
               </button>
             </div>
- 
+
             <div className="bg-[#131927] border border-slate-800 rounded-xl p-4 flex flex-col min-[420px]:flex-row min-[420px]:items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="p-2.5 shrink-0 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-400">
@@ -370,21 +402,21 @@ export default function DocumentosView() {
                   <span className="inline-block mt-1 text-[9px] text-slate-500">Emitido Julio 2026</span>
                 </div>
               </div>
- 
+
               <button className="shrink-0 px-3 py-2 bg-[#1C2538] hover:bg-slate-800 text-slate-300 rounded-lg text-xs font-medium transition-colors">
                 Descargar
               </button>
             </div>
           </div>
         </div>
- 
+
         {/* Reglamentos */}
         <div className="space-y-3 min-w-0">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-sm font-bold text-white">Normativa y Reglamentos Vigentes</h3>
             <span className="text-xs text-slate-500">Actualización Anual</span>
           </div>
- 
+
           <div className="space-y-3">
             <div className="bg-[#131927] border border-slate-800 rounded-xl p-4 flex items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-3 min-w-0">
@@ -397,12 +429,12 @@ export default function DocumentosView() {
                   <span className="inline-block mt-1 text-[9px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">Vigente</span>
                 </div>
               </div>
- 
+
               <span className="shrink-0 px-2.5 py-1 bg-[#1C2538] text-slate-400 rounded-lg text-xs font-mono">
                 PDF
               </span>
             </div>
- 
+
             <div className="bg-[#131927] border border-slate-800 rounded-xl p-4 flex items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="p-2.5 shrink-0 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400">
@@ -414,7 +446,7 @@ export default function DocumentosView() {
                   <span className="inline-block mt-1 text-[9px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">Vigente</span>
                 </div>
               </div>
- 
+
               <span className="shrink-0 px-2.5 py-1 bg-[#1C2538] text-slate-400 rounded-lg text-xs font-mono">
                 PDF
               </span>
@@ -422,20 +454,29 @@ export default function DocumentosView() {
           </div>
         </div>
       </div>
- 
+
       {/* Modal FUT Digital */}
       {showFutModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="relative w-full max-w-4xl bg-[#0b0f17] border border-slate-800 rounded-t-2xl sm:rounded-2xl max-h-[95vh] sm:max-h-[92vh] overflow-y-auto overflow-x-hidden shadow-2xl">
-            <button
-              onClick={() => setShowFutModal(false)}
-              className="sticky top-2 float-right mr-2 mt-2 z-10 p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-full transition-all border border-slate-700"
-              title="Cerrar Formulario"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <div className="p-2 sm:p-4 w-full max-w-full">
-              <FutPage />
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto overscroll-contain"
+          onClick={(e) => { if (e.target === e.currentTarget) cerrarFut(); }}
+        >
+          <div
+            className="min-h-full flex items-end sm:items-center justify-center p-0 sm:p-4"
+            onClick={(e) => { if (e.target === e.currentTarget) cerrarFut(); }}
+          >
+            <div className="relative w-full max-w-4xl bg-[#0b0f17] border border-slate-800 rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-x-hidden">
+              <button
+                onClick={cerrarFut}
+                className="absolute top-3 right-3 z-10 p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-full transition-all border border-slate-700"
+                title="Cerrar Formulario"
+                aria-label="Cerrar formulario"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <div className="p-2 sm:p-4 w-full max-w-full">
+                <FutPage />
+              </div>
             </div>
           </div>
         </div>
@@ -443,4 +484,3 @@ export default function DocumentosView() {
     </div>
   );
 }
- 
