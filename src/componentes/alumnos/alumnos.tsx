@@ -69,7 +69,7 @@ const menuGroups: MenuGroup[] = [
   {
     title: 'COMUNIDAD',
     items: [
-      { id: 'foros', label: 'Foros de discusión', icon: <MessageSquare className="h-4 w-4" /> },
+      { id: 'foros', label: 'Comunicados', icon: <MessageSquare className="h-4 w-4" /> },
       { id: 'directorio', label: 'Directorio', icon: <Users className="h-4 w-4" /> }
     ]
   },
@@ -253,7 +253,7 @@ export default function EstudianteDashboard() {
       case 'recursos':
         return <RecursosDeEstudioView />;
       case 'foros':
-        return <PlaceholderView title="Foros de Discusión Estudiantil" />;
+        return <PlaceholderView title="Comunicados" />;
       case 'directorio':
         return <DirectorioView />;
       case 'progreso':
@@ -410,11 +410,6 @@ export default function EstudianteDashboard() {
             <button className="relative rounded-xl bg-slate-900 p-2 text-slate-400 hover:text-white">
               <Bell className="h-4 w-4" />
               <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-blue-500" />
-            </button>
-
-            <button className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 transition-colors">
-              <Plus className="h-4 w-4" />
-              <span>Nueva Tarea</span>
             </button>
           </div>
         </header>
