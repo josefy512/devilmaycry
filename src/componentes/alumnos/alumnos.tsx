@@ -5,9 +5,8 @@ import CalendarioView from './calendario/calendario';
 import DocumentosView from "./documentos/documentos";
 import DirectorioView from './directorio/directorio';
 import PagosView from './pagos/pagos';
-import { useState, useEffect } from "react";
-import { 
-  LayoutDashboard,
+import React, { useState, useEffect } from "react";
+import {
   Calendar,
   CheckSquare,
   BookOpen,
@@ -26,9 +25,9 @@ import {
   X,
   LogOut,
   CreditCard,
-  Play,
   Home,
-  Compass
+  ChevronRight,
+  GraduationCap
 } from "lucide-react";
 
 type SectionId =
@@ -57,135 +56,158 @@ type MenuGroup = {
 const menuGroups: MenuGroup[] = [
   {
     items: [
-      { id: 'panel', label: 'Panel Principal', icon: <Home className="h-5 w-5" /> }
-    ]    
-  },
-  {
-    title: 'ACADÉMICO',
-    items: [
-      { id: 'calendario', label: 'Calendario', icon: <Calendar className="h-5 w-5" /> },
-      { id: 'tareas', label: 'Tareas y Proyectos', icon: <CheckSquare className="h-5 w-5" /> },
-      { id: 'recursos', label: 'Recursos de estudio', icon: <BookOpen className="h-5 w-5" /> }
+      { id: 'panel', label: 'Panel Principal', icon: <Home className="h-4 w-4" /> }
     ]
   },
   {
-    title: 'COMUNIDAD',
+    title: 'GESTIÓN ACADÉMICA',
     items: [
-      { id: 'foros', label: 'Comunicados', icon: <MessageSquare className="h-5 w-5" /> },
-      { id: 'directorio', label: 'Directorio', icon: <Users className="h-5 w-5" /> }
+      { id: 'calendario', label: 'Horario y Calendario', icon: <Calendar className="h-4 w-4" /> },
+      { id: 'tareas', label: 'Tareas y Evaluaciones', icon: <CheckSquare className="h-4 w-4" /> },
+      { id: 'recursos', label: 'Biblioteca y Recursos', icon: <BookOpen className="h-4 w-4" /> },
+      { id: 'progreso', label: 'Record de Notas', icon: <TrendingUp className="h-4 w-4" /> }
     ]
   },
   {
-    title: 'CARRERA',
+    title: 'TRÁMITES Y TESORERÍA',
     items: [
-      { id: 'progreso', label: 'Progreso', icon: <TrendingUp className="h-5 w-5" /> },
-      { id: 'bolsa', label: 'Bolsa de trabajo', icon: <Briefcase className="h-5 w-5" /> },
-      { id: 'documentos', label: 'Documentos', icon: <FileText className="h-5 w-5" /> },
-      { id: 'pagos', label: 'Pagos y Pensiones', icon: <CreditCard className="h-5 w-5" /> }
+      { id: 'pagos', label: 'Estado de Pagos', icon: <CreditCard className="h-4 w-4" /> },
+      { id: 'documentos', label: 'Documentos y Constancias', icon: <FileText className="h-4 w-4" /> }
+    ]
+  },
+  {
+    title: 'COMUNIDAD Y CARRERA',
+    items: [
+      { id: 'foros', label: 'Comunicados Oficiales', icon: <MessageSquare className="h-4 w-4" /> },
+      { id: 'directorio', label: 'Directorio Institucional', icon: <Users className="h-4 w-4" /> },
+      { id: 'bolsa', label: 'Bolsa Laboral', icon: <Briefcase className="h-4 w-4" /> }
     ]
   }
 ];
 
-const PanelControlView = () => (
-  <div className="space-y-8">
-    {/* Tarjetas Superiores estilo Spotify Grid */}
+const PanelControlView = ({ onNavigate }: { onNavigate: (sec: SectionId) => void }) => (
+  <div className="space-y-6">
+    {/* Indicadores principales en modo oscuro institucional */}
     <div>
-      <h2 className="text-xl font-extrabold text-white mb-4 tracking-tight">Resumen de Hoy</h2>
+      <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+        Situación Académica Actual
+      </h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {/* Tarjeta 1: Tareas Pendientes */}
-        <div className="group relative overflow-hidden rounded-md bg-[#181818] p-5 hover:bg-[#282828] transition-all duration-300">
+        {/* Tarjeta 1: Tareas */}
+        <div
+          onClick={() => onNavigate('tareas')}
+          className="cursor-pointer rounded-lg bg-[#111C26] border border-slate-800 border-l-4 border-l-amber-400 p-5 hover:border-slate-700 transition-all"
+        >
           <div className="flex items-center justify-between">
-            <AlertTriangle className="h-6 w-6 text-amber-400" />
-            <span className="rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-[10px] font-bold text-amber-400 uppercase tracking-wider">
-              Urgente
+            <span className="text-xs font-semibold text-slate-300">Actividades Pendientes</span>
+            <span className="inline-flex items-center gap-1 rounded bg-amber-500/15 border border-amber-400/30 px-2 py-0.5 text-[11px] font-semibold text-amber-300">
+              <AlertTriangle className="h-3 w-3" />
+              Por entregar
             </span>
           </div>
-          <p className="mt-4 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Tareas Pendientes</p>
-          <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white">5</span>
-            <span className="text-xs font-bold text-amber-400">+2 nuevas</span>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl font-extrabold text-white">5</span>
+            <span className="text-xs font-medium text-amber-300">2 próximas a vencer</span>
           </div>
         </div>
 
-        {/* Tarjeta 2: Próximo Examen */}
-        <div className="group relative overflow-hidden rounded-md bg-[#181818] p-5 hover:bg-[#282828] transition-all duration-300">
+        {/* Tarjeta 2: Próxima Evaluación */}
+        <div
+          onClick={() => onNavigate('calendario')}
+          className="cursor-pointer rounded-lg bg-[#111C26] border border-slate-800 border-l-4 border-l-[#0084C2] p-5 hover:border-slate-700 transition-all"
+        >
           <div className="flex items-center justify-between">
-            <Clock className="h-6 w-6 text-[#1DB954]" />
-            <span className="rounded-full bg-[#1DB954]/10 border border-[#1DB954]/20 px-2.5 py-0.5 text-[10px] font-bold text-[#1DB954] uppercase tracking-wider">
+            <span className="text-xs font-semibold text-slate-300">Próxima Evaluación</span>
+            <span className="inline-flex items-center gap-1 rounded bg-[#0084C2]/15 border border-[#0084C2]/35 px-2 py-0.5 text-[11px] font-semibold text-[#A8D5EE]">
+              <Clock className="h-3 w-3" />
               En 2 días
             </span>
           </div>
-          <p className="mt-4 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Próximo Examen</p>
-          <h3 className="mt-1 text-2xl font-black text-white truncate">Cálculo II</h3>
+          <h3 className="mt-3 text-xl font-extrabold text-white truncate">Cálculo II</h3>
+          <p className="mt-0.5 text-xs text-slate-400">Evaluación parcial programada</p>
         </div>
 
-        {/* Tarjeta 3: Promedio Actual */}
-        <div className="group relative overflow-hidden rounded-md bg-[#181818] p-5 hover:bg-[#282828] transition-all duration-300">
+        {/* Tarjeta 3: Promedio */}
+        <div
+          onClick={() => onNavigate('progreso')}
+          className="cursor-pointer rounded-lg bg-[#111C26] border border-slate-800 border-l-4 border-l-emerald-500 p-5 hover:border-slate-700 transition-all"
+        >
           <div className="flex items-center justify-between">
-            <TrendingUp className="h-6 w-6 text-emerald-400" />
-            <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
-              Global
+            <span className="text-xs font-semibold text-slate-300">Promedio Ponderado</span>
+            <span className="inline-flex items-center gap-1 rounded bg-emerald-500/15 border border-emerald-400/30 px-2 py-0.5 text-[11px] font-semibold text-emerald-300">
+              <TrendingUp className="h-3 w-3" />
+              Aprobado
             </span>
           </div>
-          <p className="mt-4 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Promedio Actual</p>
-          <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white">16.8</span>
-            <span className="text-xs font-bold text-[#1DB954]">+0.2%</span>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl font-extrabold text-white">16.8</span>
+            <span className="text-xs font-medium text-emerald-300">Periodo vigente</span>
           </div>
         </div>
       </div>
     </div>
 
-    {/* Sección de Accesos Rápidos estilo Playlist Cards */}
+    {/* Accesos Directos */}
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-extrabold text-white tracking-tight hover:underline cursor-pointer">
-          Accesos Rápidos
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+          Accesos Frecuentes
         </h2>
-        <button className="text-xs font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-wider">
-          Ver todo
+        <button
+          onClick={() => onNavigate('documentos')}
+          className="text-xs font-semibold text-[#A8D5EE] hover:underline"
+        >
+          Ver trámites y documentos
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {/* Acceso 1 */}
-        <div className="group relative rounded-md bg-[#181818] p-4 hover:bg-[#282828] transition-all duration-300 cursor-pointer">
-          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#282828] text-[#1DB954] group-hover:scale-105 transition-transform">
-            <CheckSquare className="h-6 w-6" />
+      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
+        <div
+          onClick={() => onNavigate('tareas')}
+          className="group flex items-center justify-between rounded-lg bg-[#111C26] border border-slate-800 p-4 hover:border-[#0084C2]/60 hover:bg-[#152330] transition-all cursor-pointer"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#002B45] border border-[#0084C2]/40 text-[#A8D5EE]">
+              <CheckSquare className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <h4 className="font-bold text-white text-sm truncate">Entrega de Tareas</h4>
+              <p className="text-xs text-slate-400 truncate">Subir proyectos y prácticas</p>
+            </div>
           </div>
-          <h4 className="mt-4 font-bold text-white text-base">Subir Tarea</h4>
-          <p className="text-xs text-zinc-400 mt-1 font-medium">Entrega tu proyecto final</p>
-          
-          {/* Botón flotante Play de Spotify */}
-          <div className="absolute right-4 bottom-4 flex h-10 w-10 items-center justify-center rounded-full bg-[#1DB954] text-black opacity-0 shadow-lg shadow-black/50 group-hover:opacity-100 group-hover:translate-y-0 translate-y-2 transition-all duration-300">
-            <Play className="h-5 w-5 fill-black translate-x-0.5" />
-          </div>
+          <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-[#A8D5EE] transition-colors shrink-0" />
         </div>
 
-        {/* Acceso 2 */}
-        <div className="group relative rounded-md bg-[#181818] p-4 hover:bg-[#282828] transition-all duration-300 cursor-pointer">
-          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#282828] text-blue-400 group-hover:scale-105 transition-transform">
-            <Clock className="h-6 w-6" />
+        <div
+          onClick={() => onNavigate('pagos')}
+          className="group flex items-center justify-between rounded-lg bg-[#111C26] border border-slate-800 p-4 hover:border-[#0084C2]/60 hover:bg-[#152330] transition-all cursor-pointer"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0084C2] text-white">
+              <CreditCard className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <h4 className="font-bold text-white text-sm truncate">Pagos y Pensiones</h4>
+              <p className="text-xs text-slate-400 truncate">Consultar cuotas y recibos</p>
+            </div>
           </div>
-          <h4 className="mt-4 font-bold text-white text-base">Horario Hoy</h4>
-          <p className="text-xs text-zinc-400 mt-1 font-medium">Revisa tu próxima clase</p>
-
-          <div className="absolute right-4 bottom-4 flex h-10 w-10 items-center justify-center rounded-full bg-[#1DB954] text-black opacity-0 shadow-lg shadow-black/50 group-hover:opacity-100 group-hover:translate-y-0 translate-y-2 transition-all duration-300">
-            <Play className="h-5 w-5 fill-black translate-x-0.5" />
-          </div>
+          <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-[#A8D5EE] transition-colors shrink-0" />
         </div>
 
-        {/* Acceso 3 */}
-        <div className="group relative rounded-md bg-[#181818] p-4 hover:bg-[#282828] transition-all duration-300 cursor-pointer">
-          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#282828] text-purple-400 group-hover:scale-105 transition-transform">
-            <BookOpen className="h-6 w-6" />
+        <div
+          onClick={() => onNavigate('recursos')}
+          className="group flex items-center justify-between rounded-lg bg-[#111C26] border border-slate-800 p-4 hover:border-[#0084C2]/60 hover:bg-[#152330] transition-all cursor-pointer"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#002B45] border border-[#0084C2]/40 text-[#A8D5EE]">
+              <BookOpen className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <h4 className="font-bold text-white text-sm truncate">Material de Estudio</h4>
+              <p className="text-xs text-slate-400 truncate">Sílabos, guías y bibliografía</p>
+            </div>
           </div>
-          <h4 className="mt-4 font-bold text-white text-base">Biblioteca</h4>
-          <p className="text-xs text-zinc-400 mt-1 font-medium">Buscar libro o recurso</p>
-
-          <div className="absolute right-4 bottom-4 flex h-10 w-10 items-center justify-center rounded-full bg-[#1DB954] text-black opacity-0 shadow-lg shadow-black/50 group-hover:opacity-100 group-hover:translate-y-0 translate-y-2 transition-all duration-300">
-            <Play className="h-5 w-5 fill-black translate-x-0.5" />
-          </div>
+          <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-[#A8D5EE] transition-colors shrink-0" />
         </div>
       </div>
     </div>
@@ -193,10 +215,10 @@ const PanelControlView = () => (
 );
 
 const PlaceholderView = ({ title }: { title: string }) => (
-  <div className="rounded-md bg-[#181818] p-8 text-center border border-zinc-800">
-    <h2 className="text-xl font-bold text-white">{title}</h2>
-    <p className="mt-2 text-sm text-zinc-400">
-      Módulo en desarrollo. Esta vista se conectará próximamente con el servidor.
+  <div className="rounded-lg bg-[#111C26] p-8 text-center border border-slate-800">
+    <h2 className="text-base font-bold text-white">{title}</h2>
+    <p className="mt-1.5 text-xs sm:text-sm text-slate-400">
+      Módulo habilitado en la estructura académica. Próximamente disponible con registros históricos.
     </p>
   </div>
 );
@@ -225,12 +247,13 @@ export default function EstudianteDashboard() {
 
   const fullName = studentUser
     ? `${studentUser.nombres} ${studentUser.apellidos}`
-    : 'Alumno Progresa';
+    : 'Alumno Registrado';
 
-  const carrera = studentUser?.carrera || 'Carrera Profesional';
+  const carrera = studentUser?.carrera || 'Programa de Estudios';
+  const codigoAlumno = studentUser?.codigo || 'EST-2026';
 
   const getInitials = (name: string) => {
-    if (!name) return 'AP';
+    if (!name) return 'ER';
     const parts = name.trim().split(/\s+/);
     if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
     return (parts[0][0] + parts[1][0]).toUpperCase();
@@ -244,6 +267,7 @@ export default function EstudianteDashboard() {
     return 'panel';
   });
 
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
   const [isOnline, setIsOnline] = useState<boolean>(
     typeof window !== 'undefined' ? navigator.onLine : true
@@ -262,10 +286,30 @@ export default function EstudianteDashboard() {
     };
   }, []);
 
+  const handleNavigate = (sec: SectionId) => {
+    setActive(sec);
+    localStorage.setItem('progresa_student_section', sec);
+    setMobileOpen(false);
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      for (const group of menuGroups) {
+        const match = group.items.find((item) => item.label.toLowerCase().includes(q));
+        if (match) {
+          handleNavigate(match.id);
+          setSearchQuery('');
+          break;
+        }
+      }
+    }
+  };
+
   const renderView = () => {
     switch (active) {
       case 'panel':
-        return <PanelControlView />;
+        return <PanelControlView onNavigate={handleNavigate} />;
       case 'calendario':
         return <CalendarioView />;
       case 'tareas':
@@ -273,11 +317,11 @@ export default function EstudianteDashboard() {
       case 'recursos':
         return <RecursosDeEstudioView />;
       case 'foros':
-        return <PlaceholderView title="Comunicados" />;
+        return <PlaceholderView title="Comunicados Oficiales" />;
       case 'directorio':
         return <DirectorioView />;
       case 'progreso':
-        return <PlaceholderView title="Mi Progreso Académico" />;
+        return <PlaceholderView title="Record de Notas y Avance Curricular" />;
       case 'bolsa':
         return <BolsaDeTrabajoView />;
       case 'documentos':
@@ -288,41 +332,43 @@ export default function EstudianteDashboard() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-black text-zinc-100 font-sans p-2 gap-2 overflow-hidden select-none">
-      {/* Sidebar Estilo Spotify (Panel Izquierdo Independiente) */}
+    <div className="flex h-screen w-full bg-[#0B1218] text-slate-200 font-sans overflow-hidden select-none">
+      {/* Menú lateral oscuro institucional */}
       <aside
         className={`${
-          mobileOpen ? 'fixed inset-0 z-50 block bg-black/90 p-2' : 'hidden'
-        } md:relative md:block md:w-64 md:flex-shrink-0 h-full`}
+          mobileOpen ? 'fixed inset-0 z-50 block bg-black/70' : 'hidden'
+        } md:relative md:block md:w-64 md:shrink-0 h-full`}
       >
-        <div className="flex h-full flex-col rounded-lg bg-[#121212] p-3 border border-zinc-800/40">
-          {/* Header Sidebar / Nombre Institución */}
-          <div className="flex items-center justify-between px-3 py-2 mb-2">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1DB954] text-black font-black">
-                <BookOpen className="h-5 w-5" />
+        <div className="flex h-full w-64 flex-col bg-[#0F1923] border-r border-slate-800">
+          {/* Cabecera azul marino estilo Registra */}
+          <div className="flex items-center justify-between px-4 py-3.5 bg-[#002B45] text-white border-b-4 border-[#0084C2]">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded bg-[#0F1923] border border-[#A8D5EE]/30 text-[#A8D5EE] font-bold">
+                <GraduationCap className="h-5 w-5" />
               </div>
               <div className="min-w-0 flex-1">
-                <span className="block truncate font-extrabold text-white text-sm" title={nombreInstitucion}>
+                <span className="block truncate font-bold text-white text-sm" title={nombreInstitucion}>
                   {nombreInstitucion}
                 </span>
-                <span className="block text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Progresa App</span>
+                <span className="block text-[10px] text-[#A8D5EE] font-semibold uppercase tracking-wider">
+                  Sistema Académico
+                </span>
               </div>
             </div>
             <button
               onClick={() => setMobileOpen(false)}
-              className="text-zinc-400 hover:text-white md:hidden shrink-0"
+              className="rounded p-1 text-slate-300 hover:text-white md:hidden shrink-0"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
 
-          {/* Navegación por Grupos (Spotify Library style) */}
-          <nav className="flex-1 space-y-6 overflow-y-auto px-1 custom-scrollbar pt-2">
+          {/* Navegación sin barra de scroll visible */}
+          <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {menuGroups.map((group, idx) => (
               <div key={idx} className="space-y-1">
                 {group.title && (
-                  <h4 className="px-3 text-[10px] font-extrabold tracking-widest text-zinc-400 uppercase mb-2">
+                  <h4 className="px-3 text-[10px] font-bold tracking-wider text-slate-500 uppercase mb-1.5">
                     {group.title}
                   </h4>
                 )}
@@ -331,18 +377,14 @@ export default function EstudianteDashboard() {
                   return (
                     <button
                       key={item.id}
-                      onClick={() => {
-                        setActive(item.id);
-                        localStorage.setItem('progresa_student_section', item.id);
-                        setMobileOpen(false);
-                      }}
-                      className={`flex w-full items-center gap-4 rounded-md px-3 py-2.5 text-sm font-bold transition-all duration-200 ${
+                      onClick={() => handleNavigate(item.id)}
+                      className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-xs font-semibold transition-colors ${
                         isActive
-                          ? 'bg-[#282828] text-white shadow-sm'
-                          : 'text-zinc-400 hover:text-white hover:bg-[#181818]'
+                          ? 'bg-[#002B45] text-white border-l-4 border-[#0084C2]'
+                          : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/70'
                       }`}
                     >
-                      <span className={isActive ? 'text-[#1DB954]' : 'text-zinc-400'}>
+                      <span className={isActive ? 'text-[#A8D5EE]' : 'text-slate-500'}>
                         {item.icon}
                       </span>
                       <span className="truncate">{item.label}</span>
@@ -353,20 +395,19 @@ export default function EstudianteDashboard() {
             ))}
           </nav>
 
-          {/* Perfil del Alumno (Estilo Bottom Bar Player) */}
-          <div className="mt-auto pt-3 border-t border-zinc-800/80">
-            <div className="flex items-center justify-between gap-3 p-2 rounded-md bg-[#181818] hover:bg-[#282828] transition-colors">
+          {/* Pie de perfil del alumno */}
+          <div className="p-3 bg-[#0B1218]/70 border-t border-slate-800">
+            <div className="flex items-center justify-between gap-2 p-2 rounded-md bg-[#111C26] border border-slate-800">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1DB954] text-xs font-black text-black">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-[#002B45] border border-[#0084C2]/40 text-xs font-bold text-[#A8D5EE]">
                   {getInitials(fullName)}
                 </div>
-
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-bold text-white">
                     {fullName}
                   </p>
-                  <p className="truncate text-[10px] text-zinc-400 font-medium">
-                    {carrera}
+                  <p className="truncate text-[10px] text-slate-400 font-medium">
+                    Cód: {codigoAlumno}
                   </p>
                 </div>
               </div>
@@ -378,7 +419,7 @@ export default function EstudianteDashboard() {
                   window.location.reload();
                 }}
                 title="Cerrar sesión"
-                className="rounded-full p-2 text-zinc-400 hover:text-white hover:bg-zinc-700/50 transition-colors shrink-0"
+                className="rounded p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors shrink-0"
               >
                 <LogOut className="h-4 w-4" />
               </button>
@@ -387,73 +428,92 @@ export default function EstudianteDashboard() {
         </div>
       </aside>
 
-      {/* Contenido Principal (Panel Flotante Derecho estilo Spotify) */}
-      <main className="flex h-full flex-1 flex-col overflow-hidden rounded-lg bg-[#121212] border border-zinc-800/40">
-        {/* Topbar Superior con Navegación y Búsqueda */}
-        <header className="flex h-16 shrink-0 items-center justify-between bg-[#121212]/90 px-6 backdrop-blur-md border-b border-zinc-800/40 sticky top-0 z-10">
-          <div className="flex items-center gap-4">
+      {/* Contenedor Principal */}
+      <main className="flex h-full flex-1 flex-col overflow-hidden bg-[#0B1218]">
+        {/* Barra superior oscura institucional */}
+        <header className="flex h-16 shrink-0 items-center justify-between bg-[#0F1923] px-4 sm:px-6 border-b border-slate-800">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileOpen(true)}
-              className="rounded-full p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 md:hidden"
+              className="rounded-md p-2 text-slate-300 hover:bg-slate-800 md:hidden"
             >
               <Menu className="h-5 w-5" />
             </button>
-            
-            {/* Buscador Estilo Spotify Topbar */}
+
             <div className="relative hidden sm:block w-72">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
               <input
                 type="text"
-                placeholder="¿Qué quieres consultar hoy?"
-                className="w-full rounded-full bg-[#242424] border-none py-2 pl-9 pr-4 text-xs text-white placeholder-zinc-400 focus:ring-2 focus:ring-white focus:outline-none transition-all font-medium"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                placeholder="Ir a módulo (ej. pagos, tareas)..."
+                className="w-full rounded-md bg-[#0B1218] border border-slate-700/80 py-1.5 pl-9 pr-3 text-xs text-slate-100 placeholder-slate-500 focus:border-[#0084C2] focus:outline-none transition-colors"
               />
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Estado de Conexión en línea / offline */}
+            {/* Estado de red */}
             <div
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold transition-all duration-300 ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold border ${
                 isOnline
-                  ? 'bg-[#1DB954]/10 text-[#1DB954] border border-[#1DB954]/20'
-                  : 'bg-rose-500/10 text-rose-400 border border-rose-500/20 animate-pulse'
+                  ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                  : 'bg-rose-500/10 text-rose-300 border-rose-500/30'
               }`}
             >
               {isOnline ? (
                 <>
-                  <Wifi className="w-3.5 h-3.5 text-[#1DB954]" />
-                  <span>En línea</span>
+                  <Wifi className="w-3.5 h-3.5" />
+                  <span>Conectado</span>
                 </>
               ) : (
                 <>
-                  <WifiOff className="w-3.5 h-3.5 text-rose-400" />
-                  <span>Desconectado</span>
+                  <WifiOff className="w-3.5 h-3.5" />
+                  <span>Modo sin conexión</span>
                 </>
-              ) }
+              )}
             </div>
 
-            <button className="relative rounded-full bg-[#181818] p-2 text-zinc-400 hover:text-white hover:bg-[#282828] transition-colors">
+            <button
+              onClick={() => handleNavigate('foros')}
+              title="Comunicados oficiales"
+              className="relative rounded-md border border-slate-800 bg-[#111C26] p-2 text-slate-300 hover:bg-slate-800 transition-colors"
+            >
               <Bell className="h-4 w-4" />
-              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#1DB954]" />
+              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#0084C2]" />
             </button>
           </div>
         </header>
 
-        {/* Cuerpo Principal del Dashboard */}
-        <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 custom-scrollbar">
+        {/* Área de contenido */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {active === 'panel' && (
-            <div className="bg-gradient-to-b from-zinc-800/40 to-transparent p-6 rounded-lg border border-zinc-800/30">
-              <h1 className="text-3xl font-black text-white tracking-tight">
-                ¡Buenas noches, {studentUser ? studentUser.nombres : 'Alumno'}!
-              </h1>
-              <p className="text-xs text-zinc-400 mt-1 font-semibold">
-                Resumen de actividad académica en tiempo real.
-              </p>
+            <div className="rounded-lg bg-[#002B45] text-white p-5 sm:p-6 border-b-4 border-[#0084C2]">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[#A8D5EE]">
+                    Portal del Estudiante · Periodo Académico 2026
+                  </span>
+                  <h1 className="text-xl sm:text-2xl font-bold text-white mt-0.5">
+                    Bienvenido(a), {studentUser ? studentUser.nombres : 'Estudiante'}
+                  </h1>
+                  <p className="text-xs text-slate-200 mt-1">
+                    {carrera} — {nombreInstitucion}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
           {renderView()}
         </div>
+
+        {/* Franja inferior oscura con borde azul institucional */}
+        <footer className="shrink-0 bg-[#0F1923] border-t border-[#0084C2]/40 px-6 py-2 flex flex-wrap items-center justify-between text-[11px] text-slate-400">
+          <span className="font-semibold text-[#A8D5EE]">Progresa App — Sistema de Gestión Académica</span>
+          <span>Soporte institucional · Sincronización automática activa</span>
+        </footer>
       </main>
     </div>
   );
