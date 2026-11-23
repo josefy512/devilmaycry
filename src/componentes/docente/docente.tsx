@@ -1,64 +1,70 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from "../supabaseClient";
+import { supabase } from '../supabaseClient';
 import CalificacionesPanel from './calificaciones/calificaciones';
-import AsistenciasPanel from "./asistencias/asistencias";
-import HorariosPanel from "./horarios/horarios";
-import CursosPanel from "./cursos/cursos";
+import AsistenciasPanel from './asistencias/asistencias';
+import HorariosPanel from './horarios/horarios';
+import CursosPanel from './cursos/cursos';
 
-import { 
-  LayoutDashboard, 
-  CheckSquare, 
-  Users, 
-  Calendar, 
-  BookOpen, 
-  Award, 
-  Settings, 
-  LogOut, 
-  Search, 
-  Bell, 
-  AlertCircle, 
-  TrendingUp, 
-  MessageSquare, 
-  FileCheck2, 
-  Eye, 
-  Clock, 
-  Upload, 
-  Send, 
-  HelpCircle, 
-  ChevronRight, 
-  Menu, 
-  Sun,
-  Moon
+import {
+  LayoutDashboard,
+  CheckSquare,
+  Users,
+  Calendar,
+  BookOpen,
+  Award,
+  LogOut,
+  Search,
+  AlertCircle,
+  TrendingUp,
+  MessageSquare,
+  FileCheck2,
+  Eye,
+  Clock,
+  Upload,
+  Send,
+  HelpCircle,
+  ChevronRight,
+  Menu
 } from 'lucide-react';
 
-type DocenteSectionId = 'panel' | 'calificaciones' | 'asistencias' | 'horarios' | 'cursos' | 'configuracion';
+type DocenteSectionId = 'panel' | 'calificaciones' | 'asistencias' | 'horarios' | 'cursos';
+
+interface FutAprobado {
+  id: string | number;
+  nombres_apellidos?: string;
+  sumilla?: string;
+  fundamento?: string;
+  fecha_solicitud?: string;
+}
 
 export default function DocentesLayout() {
   const [activeSection, setActiveSection] = useState<DocenteSectionId>('panel');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
-  // Estado para el Modo Oscuro / Claro (persiste en localStorage)
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('progresa_theme');
-    return saved ? saved === 'dark' : true;
-  });
 
-  useEffect(() => {
-    localStorage.setItem('progresa_theme', isDarkMode ? 'dark' : 'light');
-  }, [isDarkMode]);
+  const usuario = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('usuarioLogueado') || '{}');
+    } catch {
+      return {};
+    }
+  })();
 
-  // Obtener los datos del docente logueado
-  const usuario = JSON.parse(localStorage.getItem('usuarioLogueado') || '{}');
-  const nombreCompleto = `${usuario.nombres || 'Docente'} ${usuario.apellidos || ''}`.trim();
-  const correoDocente = usuario.email || 'correo@progresa.edu.pe';
-  const iniciales = `${usuario.nombres?.[0] || ''}${usuario.apellidos?.[0] || ''}`.toUpperCase() || 'DC';
+  const nombreCompleto =
+    `${usuario.nombres || ''} ${usuario.apellidos || ''}`.trim() || 'Docente Institucional';
+  const correoDocente = usuario.email || 'docente@institucion.edu.pe';
+  const iniciales =
+    `${usuario.nombres?.[0] || ''}${usuario.apellidos?.[0] || ''}`.toUpperCase() || 'DC';
 
-  const navigationItems = [
+  const navigationItems: Array<{
+    id: DocenteSectionId;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }> = [
     { id: 'panel', label: 'Panel de control', icon: LayoutDashboard },
     { id: 'calificaciones', label: 'Calificaciones', icon: Award },
     { id: 'asistencias', label: 'Asistencias', icon: CheckSquare },
     { id: 'horarios', label: 'Horarios', icon: Calendar },
-    { id: 'cursos', label: 'Mis Cursos', icon: BookOpen },
+    { id: 'cursos', label: 'Mis Cursos', icon: BookOpen }
   ];
 
   const handleCerrarSesion = () => {
@@ -68,161 +74,127 @@ export default function DocentesLayout() {
   };
 
   return (
-    <div className={`min-h-screen flex font-sans transition-colors duration-200 ${
-      isDarkMode ? 'bg-[#0B0F17] text-slate-100' : 'bg-[#F8FAFC] text-slate-800'
-    }`}>
-      
-      {/* Overlay para cerrar el menú en móviles (al hacer clic fuera, se cierra limpiamente) */}
+    <div className="min-h-screen w-full overflow-x-hidden flex bg-[#0B1218] text-slate-200">
+      {/* Overlay móvil */}
       {mobileMenuOpen && (
-        <div 
+        <div
           onClick={() => setMobileMenuOpen(false)}
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-xs"
+          className="fixed inset-0 bg-black/70 z-40 lg:hidden"
         />
       )}
 
-      {/* 1. BARRA LATERAL (SIDEBAR) - Limpia, sin X flotando */}
-      <aside 
-        className={`fixed lg:static top-0 bottom-0 left-0 z-50 w-64 p-5 flex flex-col justify-between transition-transform duration-300 ease-in-out border-r ${
-          isDarkMode 
-            ? 'bg-[#121722] border-slate-800/80 text-slate-100' 
-            : 'bg-white border-slate-200 text-slate-800 shadow-xl lg:shadow-none'
-        } ${
+      {/* Barra lateral institucional */}
+      <aside
+        className={`fixed lg:static top-0 bottom-0 left-0 z-50 w-64 bg-[#0F1923] border-r border-slate-800 p-4 flex flex-col justify-between transition-transform duration-200 shrink-0 ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        <div className="space-y-6">
-          {/* Perfil del Docente */}
-          <div className={`flex items-center gap-3 pb-4 border-b ${
-            isDarkMode ? 'border-slate-800' : 'border-slate-100'
-          }`}>
-            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-sm text-white shadow-md shadow-blue-500/20">
+        <div className="space-y-5">
+          {/* Identificador del docente */}
+          <div className="flex items-center gap-3 pb-4 border-b border-slate-800">
+            <div className="w-10 h-10 rounded-md bg-[#002B45] border border-[#0084C2]/30 flex items-center justify-center font-bold text-xs text-[#A8D5EE] shrink-0">
               {iniciales}
             </div>
-            <div className="overflow-hidden">
-              <h2 className={`font-bold text-sm truncate ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{nombreCompleto}</h2>
-              <p className={`text-[11px] truncate ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{correoDocente}</p>
+            <div className="min-w-0">
+              <h2 className="font-bold text-sm text-white truncate">{nombreCompleto}</h2>
+              <p className="text-[11px] text-slate-400 truncate">{correoDocente}</p>
             </div>
           </div>
 
-          {/* Menú de Navegación Principal */}
+          {/* Navegación principal */}
           <nav className="space-y-1">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeSection === item.id;
               return (
                 <button
+                  type="button"
                   key={item.id}
                   onClick={() => {
-                    setActiveSection(item.id as DocenteSectionId);
+                    setActiveSection(item.id);
                     setMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
-                    isActive 
-                      ? 'bg-blue-600 text-white font-semibold shadow-md shadow-blue-600/20' 
-                      : isDarkMode 
-                        ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-xs font-semibold transition-colors ${
+                    isActive
+                      ? 'bg-[#002B45] text-white border border-[#0084C2]/50'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-[#111C26]'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : ''}`} />
-                  <span>{item.label}</span>
+                  <Icon className="w-4 h-4 text-[#A8D5EE] shrink-0" />
+                  <span className="truncate">{item.label}</span>
                 </button>
               );
             })}
           </nav>
         </div>
 
-        {/* Sección Inferior: Tema, Configuración y Cerrar Sesión */}
-        <div className={`space-y-1.5 pt-4 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
-          
-          {/* Botón alternar Modo Oscuro / Claro */}
+        {/* Cerrar sesión */}
+        <div className="pt-4 border-t border-slate-800">
           <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
-              isDarkMode ? 'text-slate-400 hover:bg-slate-800/40 hover:text-slate-200' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-blue-600" />}
-              <span>{isDarkMode ? 'Modo Claro' : 'Modo Oscuro'}</span>
-            </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-500/10 font-mono">Alt</span>
-          </button>
-
-
-          {/*
-
-          <button
-            onClick={() => {
-              setActiveSection('configuracion');
-              setMobileMenuOpen(false);
-            }}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
-              activeSection === 'configuracion'
-                ? 'bg-blue-600 text-white font-semibold'
-                : isDarkMode ? 'text-slate-400 hover:bg-slate-800/40 hover:text-slate-200' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
-          >
-            <Settings className="w-4 h-4" />
-            <span>Configuración</span>
-          </button>
-*/}
-          {/* AQUÍ TERMINA EL COMENTARIO */}
-          <button
+            type="button"
             onClick={handleCerrarSesion}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-rose-500 hover:bg-rose-500/10 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors"
           >
-            <LogOut className="w-4 h-4" />
-            <span>Cerrar Sesión</span>
+            <LogOut className="w-4 h-4 shrink-0" />
+            <span>Cerrar sesión</span>
           </button>
         </div>
       </aside>
 
-      {/* 2. ÁREA DE CONTENIDO PRINCIPAL */}
+      {/* Área principal */}
       <div className="flex-1 flex flex-col min-w-0">
-        
-        {/* Header Móvil */}
-        <div className={`lg:hidden border-b p-4 flex items-center justify-between ${
-          isDarkMode ? 'bg-[#121722] border-slate-800' : 'bg-white border-slate-200'
-        }`}>
-          <div className="flex items-center gap-3">
-            <button 
+        {/* Cabecera móvil */}
+        <div className="lg:hidden bg-[#0F1923] border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className={`p-2 rounded-xl border transition-colors ${
-                isDarkMode ? 'bg-[#0B0F17] border-slate-800 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'
-              }`}
+              className="p-2 rounded-md bg-[#111C26] border border-slate-800 text-slate-200 hover:border-slate-700 transition-colors"
+              aria-label="Abrir menú"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-4 h-4" />
             </button>
-            <span className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Progresa • Docentes</span>
+            <span className="font-bold text-xs text-white truncate">
+              Gestión Académica · Docentes
+            </span>
           </div>
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-xs text-white">
+
+          <div className="w-8 h-8 rounded-md bg-[#002B45] border border-[#0084C2]/30 flex items-center justify-center font-bold text-xs text-[#A8D5EE] shrink-0">
             {iniciales}
           </div>
         </div>
 
-        {/* Contenido Dinámico de la Vista */}
-        <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 overflow-y-auto">
-          {activeSection === 'panel' && <PanelControlDocente isDarkMode={isDarkMode} />}
+        {/* Contenido dinámico */}
+        <main className="p-4 sm:p-6 space-y-5 flex-1 min-w-0">
+          {activeSection === 'panel' && (
+            <PanelControlDocente onNavigate={(sec) => setActiveSection(sec)} />
+          )}
           {activeSection === 'calificaciones' && <CalificacionesPanel />}
           {activeSection === 'asistencias' && <AsistenciasPanel />}
           {activeSection === 'horarios' && <HorariosPanel />}
           {activeSection === 'cursos' && <CursosPanel />}
         </main>
-
       </div>
-
     </div>
   );
 }
 
-{/* VISTA INTERNA: PANEL DE CONTROL DOCENTE CON SOPORTE DE TEMA */}
-function PanelControlDocente({ isDarkMode }: { isDarkMode: boolean }) {
-  const usuario = JSON.parse(localStorage.getItem('usuarioLogueado') || '{}');
-  const especialidadMateria = usuario.especialidad || 'Especialidad General';
+function PanelControlDocente({
+  onNavigate
+}: {
+  onNavigate: (sec: DocenteSectionId) => void;
+}) {
+  const usuario = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('usuarioLogueado') || '{}');
+    } catch {
+      return {};
+    }
+  })();
 
-  // 🟢 Estado para guardar los FUTs aprobados desde Supabase
-  const [futsAprobados, setFutsAprobados] = useState<any[]>([]);
+  const especialidadMateria = usuario.especialidad || 'Gestión Académica Docente';
+  const [busqueda, setBusqueda] = useState('');
+  const [futsAprobados, setFutsAprobados] = useState<FutAprobado[]>([]);
   const [cargandoFuts, setCargandoFuts] = useState(false);
 
   useEffect(() => {
@@ -231,7 +203,7 @@ function PanelControlDocente({ isDarkMode }: { isDarkMode: boolean }) {
       const { data, error } = await supabase
         .from('futs')
         .select('*')
-        .eq('estado', 'aprobado') // Solo los aprobados por la Directora
+        .eq('estado', 'aprobado')
         .order('fecha_solicitud', { ascending: false });
 
       if (error) {
@@ -245,297 +217,318 @@ function PanelControlDocente({ isDarkMode }: { isDarkMode: boolean }) {
     obtenerFutsAprobados();
   }, []);
 
-  const cardStyle = `border rounded-2xl p-5 transition-all ${
-    isDarkMode ? 'bg-[#121722] border-slate-800/80 text-slate-100' : 'bg-white border-slate-200 text-slate-800 shadow-xs'
-  }`;
+  const futsFiltrados = futsAprobados.filter((fut) => {
+    const q = busqueda.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      (fut.nombres_apellidos || '').toLowerCase().includes(q) ||
+      (fut.sumilla || '').toLowerCase().includes(q)
+    );
+  });
+
+  const cardStyle = 'bg-[#111C26] border border-slate-800 rounded-lg p-4 sm:p-5';
 
   return (
-    <div className="space-y-6">
-      
-      {/* Header Superior y Buscador */}
-      <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4 ${
-        isDarkMode ? 'border-slate-800' : 'border-slate-200'
-      }`}>
-        <div>
-          <span className={`text-xs font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Docente / Panel de Control</span>
-          <h1 className={`text-xl font-bold tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{especialidadMateria}</h1>
+    <div className="space-y-5">
+      {/* Cabecera del panel y buscador */}
+      <div className="rounded-lg bg-[#111C26] border border-slate-800 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="min-w-0">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#A8D5EE]">
+            Rol Docente · Periodo 2026-II
+          </span>
+          <h1 className="text-lg sm:text-xl font-bold text-white mt-0.5 truncate">
+            {especialidadMateria}
+          </h1>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <div className="relative flex-1 sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Buscar estudiante, curso... (Ctrl+K)" 
-              className={`w-full border rounded-xl pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-blue-500 transition-colors ${
-                isDarkMode 
-                  ? 'bg-[#121722] border-slate-800 text-slate-200 placeholder:text-slate-500' 
-                  : 'bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400'
-              }`}
-            />
-          </div>
-
-          <button className={`p-2.5 border rounded-xl relative self-end sm:self-auto transition-colors ${
-            isDarkMode ? 'bg-[#121722] border-slate-800 text-slate-300 hover:text-white' : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
-          }`}>
-            <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
-          </button>
+        <div className="relative w-full md:w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <input
+            type="text"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="Filtrar trámites o alumnos..."
+            className="w-full bg-[#0B1218] border border-slate-700/80 rounded-md pl-9 pr-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#0084C2] transition-colors"
+          />
         </div>
       </div>
 
-      {/* Tarjetas de Indicadores Rápidos (KPIs) */}
+      {/* Indicadores numéricos sobrios */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        {/* KPI 1 */}
-        <div className={cardStyle}>
-          <div className="flex items-center justify-between">
-            <span className={`text-xs font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Tareas por calificar</span>
-            <div className="p-2 bg-amber-500/10 text-amber-500 rounded-xl border border-amber-500/20">
-              <AlertCircle className="w-4 h-4" />
-            </div>
+        <div className={`${cardStyle} border-l-4 border-l-amber-400`}>
+          <div className="flex items-center justify-between text-slate-400 text-xs font-semibold">
+            <span>Entregas por revisar</span>
+            <AlertCircle className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="mt-3 flex items-baseline justify-between">
-            <span className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>14</span>
-            <span className="text-[10px] font-semibold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-md">
-              +3 desde ayer
+          <div className="mt-2.5 flex items-baseline justify-between">
+            <span className="text-2xl font-extrabold text-white">14</span>
+            <span className="text-[11px] font-semibold text-amber-300">Pendientes</span>
+          </div>
+          <p className="text-[11px] text-slate-400 mt-1.5">Asignaturas activas del ciclo</p>
+        </div>
+
+        <div className={`${cardStyle} border-l-4 border-l-emerald-500`}>
+          <div className="flex items-center justify-between text-slate-400 text-xs font-semibold">
+            <span>Asistencia promedio</span>
+            <Users className="w-4 h-4 text-emerald-400" />
+          </div>
+          <div className="mt-2.5 flex items-baseline justify-between">
+            <span className="text-2xl font-extrabold text-white">92%</span>
+            <span className="text-[11px] font-semibold text-emerald-300 inline-flex items-center gap-0.5">
+              <TrendingUp className="w-3 h-3" /> Consolidado
             </span>
           </div>
-          <p className={`text-[11px] mt-2 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Pendientes de revisión en 2 cursos</p>
+          <p className="text-[11px] text-slate-400 mt-1.5">Registro semanal de sesiones</p>
         </div>
 
-        {/* KPI 2 */}
-        <div className={cardStyle}>
-          <div className="flex items-center justify-between">
-            <span className={`text-xs font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Asistencia Promedio</span>
-            <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-xl border border-emerald-500/20">
-              <Users className="w-4 h-4" />
-            </div>
+        <div className={`${cardStyle} border-l-4 border-l-[#0084C2]`}>
+          <div className="flex items-center justify-between text-slate-400 text-xs font-semibold">
+            <span>Próxima evaluación</span>
+            <Calendar className="w-4 h-4 text-[#A8D5EE]" />
           </div>
-          <div className="mt-3 flex items-baseline justify-between">
-            <span className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>92%</span>
-            <span className="text-[10px] font-semibold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md flex items-center gap-0.5">
-              <TrendingUp className="w-3 h-3" /> +1.2%
+          <div className="mt-2.5">
+            <span className="text-base font-bold text-white">Programada</span>
+            <p className="text-xs text-[#A8D5EE] font-medium truncate mt-0.5">
+              Evaluación de unidad · Grupo 4B
+            </p>
+          </div>
+          <p className="text-[11px] text-slate-400 mt-1.5">Control de actas y notas</p>
+        </div>
+
+        <div className={`${cardStyle} border-l-4 border-l-[#002B45]`}>
+          <div className="flex items-center justify-between text-slate-400 text-xs font-semibold">
+            <span>Consultas y tutorías</span>
+            <MessageSquare className="w-4 h-4 text-[#A8D5EE]" />
+          </div>
+          <div className="mt-2.5 flex items-center justify-between">
+            <span className="text-2xl font-extrabold text-white">3</span>
+            <span className="text-[11px] font-semibold text-[#A8D5EE] bg-[#002B45] px-2 py-0.5 rounded border border-[#0084C2]/30">
+              Hoy
             </span>
           </div>
-          <p className={`text-[11px] mt-2 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Promedio semanal consolidado</p>
+          <p className="text-[11px] text-slate-400 mt-1.5">Atención académica programada</p>
         </div>
-
-        {/* KPI 3 */}
-        <div className={cardStyle}>
-          <div className="flex items-center justify-between">
-            <span className={`text-xs font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Próxima Evaluación</span>
-            <div className="p-2 bg-blue-500/10 text-blue-500 rounded-xl border border-blue-500/20">
-              <Calendar className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Mañana</span>
-            <p className="text-xs text-blue-500 font-medium truncate mt-0.5">Historia del Arte • Grupo 4B</p>
-          </div>
-          <p className={`text-[11px] mt-2 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Examen Parcial Ponderado (25%)</p>
-        </div>
-
-        {/* KPI 4 */}
-        <div className={cardStyle}>
-          <div className="flex items-center justify-between">
-            <span className={`text-xs font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Tutorías Hoy</span>
-            <div className="p-2 bg-purple-500/10 text-purple-500 rounded-xl border border-purple-500/20">
-              <MessageSquare className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-center justify-between">
-            <span className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>3</span>
-            <div className="flex -space-x-2 overflow-hidden">
-              <div className="inline-block h-6 w-6 rounded-full ring-2 ring-blue-500 bg-slate-700 text-[10px] font-bold text-center leading-6 text-white">AG</div>
-              <div className="inline-block h-6 w-6 rounded-full ring-2 ring-blue-500 bg-blue-600 text-[10px] font-bold text-center leading-6 text-white">CR</div>
-              <div className="inline-block h-6 w-6 rounded-full ring-2 ring-blue-500 bg-indigo-600 text-[10px] font-bold text-center leading-6 text-white">ED</div>
-            </div>
-          </div>
-          <p className={`text-[11px] mt-2 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Sesiones de reforzamiento agendadas</p>
-        </div>
-
       </div>
 
-      {/* Grid Principal: Clase + FUTs (Izquierda) | Agenda + Accesos (Derecha) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* Columna Izquierda (8 columnas) */}
-        <div className="lg:col-span-8 space-y-6">
-          
-          {/* Tarjeta de Clase Próxima */}
-          <div className={`border rounded-2xl p-5 relative overflow-hidden shadow-md ${
-            isDarkMode ? 'bg-[#121722] border-blue-500/30 text-slate-100' : 'bg-gradient-to-br from-blue-900 to-slate-900 border-blue-900 text-white'
-          }`}>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-              <div className="space-y-2">
+      {/* Bloque principal: Sesión próxima + FUTs | Agenda + Accesos */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Columna izquierda (8 cols) */}
+        <div className="lg:col-span-8 space-y-5 min-w-0">
+          {/* Sesión programada */}
+          <div className="bg-[#111C26] border border-slate-800 border-l-4 border-l-[#0084C2] rounded-lg p-4 sm:p-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1.5 min-w-0">
                 <div className="flex flex-wrap items-center gap-2 text-xs">
-                  <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold rounded-full flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    En 15 minutos
+                  <span className="px-2 py-0.5 bg-[#002B45] text-[#A8D5EE] border border-[#0084C2]/30 font-semibold rounded text-[11px]">
+                    Próxima sesión
                   </span>
-                  <span className="text-slate-300 font-medium">Aula 102 • Pabellón B</span>
+                  <span className="text-slate-400">Aula 102 · Pabellón B</span>
                 </div>
-                <h2 className="text-xl font-bold tracking-tight">Historia del Arte Moderno</h2>
-                <p className="text-xs text-slate-300">Grupo 4B • Unidad 3: Impresionismo y Vanguardias</p>
+                <h2 className="text-base sm:text-lg font-bold text-white truncate">
+                  Sesión de Asignatura · Grupo 4B
+                </h2>
+                <p className="text-xs text-slate-400">
+                  Unidad vigente · Control de asistencia y avance del sílabo
+                </p>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button className="flex-1 sm:flex-none px-4 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs font-semibold text-white transition-colors flex items-center justify-center gap-2">
-                  <BookOpen className="w-4 h-4 text-slate-300" />
-                  <span>Ver Sílabo</span>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => onNavigate('cursos')}
+                  className="px-3.5 py-2 bg-[#0B1218] hover:bg-slate-800 border border-slate-700/80 rounded-md text-xs font-semibold text-slate-200 transition-colors flex items-center justify-center gap-2"
+                >
+                  <BookOpen className="w-4 h-4 text-[#A8D5EE]" />
+                  <span>Ver cursos</span>
                 </button>
-                <button className="flex-1 sm:flex-none px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => onNavigate('asistencias')}
+                  className="px-4 py-2 bg-[#0084C2] hover:bg-[#0073A8] text-white rounded-md text-xs font-semibold transition-colors flex items-center justify-center gap-2"
+                >
                   <CheckSquare className="w-4 h-4" />
-                  <span>Pasar Lista</span>
+                  <span>Registrar asistencia</span>
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Tabla de FUTs y Trámites */}
+          {/* Tabla de FUTs aprobados */}
           <div className={cardStyle}>
-            <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3 ${
-              isDarkMode ? 'border-slate-800' : 'border-slate-100'
-            }`}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
               <div>
-                <h3 className={`text-sm font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
-                  <FileCheck2 className="w-4 h-4 text-blue-500" />
-                  <span>Atención de FUTs y Justificaciones Médicas</span>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <FileCheck2 className="w-4 h-4 text-[#A8D5EE]" />
+                  <span>FUTs y Justificaciones Aprobadas</span>
                 </h3>
-                <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Trámites e incidencias de tus alumnos</p>
+                <p className="text-xs text-slate-400">
+                  Solicitudes validadas por dirección vinculadas a tus estudiantes
+                </p>
               </div>
-              <button className="text-xs text-blue-500 font-semibold hover:underline flex items-center gap-1">
-                <span>Ver todos</span>
+              <span className="text-xs text-[#A8D5EE] font-semibold flex items-center gap-1">
+                <span>{futsFiltrados.length} registro(s)</span>
                 <ChevronRight className="w-3.5 h-3.5" />
-              </button>
+              </span>
             </div>
 
-            <div className="overflow-x-auto mt-3">
-              <table className="w-full text-left text-xs">
-                <thead className={`uppercase text-[10px] tracking-wider border-b ${
-                  isDarkMode ? 'bg-[#0B0F17] text-slate-400 border-slate-800' : 'bg-slate-50 text-slate-500 border-slate-200'
-                }`}>
+            <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden mt-3">
+              <table className="w-full text-left text-xs min-w-[540px]">
+                <thead className="uppercase text-[10px] tracking-wider bg-[#0B1218] text-slate-400 border-b border-slate-800">
                   <tr>
-                    <th className="py-2.5 px-3">Estudiante</th>
-                    <th className="py-2.5 px-3">Trámite / Asunto</th>
-                    <th className="py-2.5 px-3">Fecha</th>
-                    <th className="py-2.5 px-3">Estado</th>
-                    <th className="py-2.5 px-3 text-right">Acción</th>
+                    <th className="py-2.5 px-3 font-bold">Estudiante</th>
+                    <th className="py-2.5 px-3 font-bold">Asunto / Sumilla</th>
+                    <th className="py-2.5 px-3 font-bold">Fecha</th>
+                    <th className="py-2.5 px-3 font-bold">Estado</th>
+                    <th className="py-2.5 px-3 font-bold text-right">Detalle</th>
                   </tr>
                 </thead>
-                <tbody className={`divide-y ${isDarkMode ? 'divide-slate-800/60 text-slate-300' : 'divide-slate-100 text-slate-700'}`}>
-                {futsAprobados.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="py-4 text-center text-slate-400 text-xs">
-                      {cargandoFuts ? 'Cargando trámites aprobados...' : 'No hay FUTs aprobados por dirección disponibles.'}
-                    </td>
-                  </tr>
-                ) : (
-                  futsAprobados.map((fut) => (
-                    <tr key={fut.id} className="transition-colors">
-                      <td className="py-3 px-3 font-medium flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-[10px] font-bold text-white">
-                          {fut.nombres_apellidos ? fut.nombres_apellidos.substring(0, 2).toUpperCase() : 'AL'}
-                        </div>
-                        <span>{fut.nombres_apellidos}</span>
-                      </td>
-                      <td className="py-3 px-3">{fut.sumilla}</td>
-                      <td className="py-3 px-3 text-slate-400">
-                        {new Date(fut.fecha_solicitud || Date.now()).toLocaleDateString('es-PE')}
-                      </td>
-                      <td className="py-3 px-3">
-                        <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-md font-semibold text-[10px]">
-                          Aprobado por Dirección
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-right">
-                        <button 
-                          onClick={() => alert(`Fundamento del alumno: ${fut.fundamento}`)}
-                          className={`p-1.5 border rounded-lg transition-colors ${
-                            isDarkMode ? 'bg-[#0B0F17] border-slate-800 text-slate-400 hover:text-white' : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
-                          }`}
-                          title="Ver detalle"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                        </button>
+                <tbody className="divide-y divide-slate-800/80 text-slate-300">
+                  {futsFiltrados.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-5 text-center text-slate-400 text-xs">
+                        {cargandoFuts
+                          ? 'Cargando trámites aprobados...'
+                          : 'No hay FUTs aprobados registrados por el momento.'}
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
+                  ) : (
+                    futsFiltrados.map((fut) => {
+                      const siglas = fut.nombres_apellidos
+                        ? fut.nombres_apellidos.substring(0, 2).toUpperCase()
+                        : 'AL';
+                      return (
+                        <tr key={fut.id} className="hover:bg-[#0B1218]/60 transition-colors">
+                          <td className="py-3 px-3 font-semibold text-white">
+                            <div className="flex items-center gap-2">
+                              <span className="w-6 h-6 rounded bg-[#002B45] border border-[#0084C2]/30 flex items-center justify-center text-[10px] font-bold text-[#A8D5EE] shrink-0">
+                                {siglas}
+                              </span>
+                              <span className="truncate">
+                                {fut.nombres_apellidos || 'Estudiante'}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-3 px-3">{fut.sumilla || 'Solicitud registrada'}</td>
+                          <td className="py-3 px-3 text-slate-400">
+                            {new Date(fut.fecha_solicitud || Date.now()).toLocaleDateString('es-PE')}
+                          </td>
+                          <td className="py-3 px-3">
+                            <span className="px-2 py-0.5 bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 rounded font-semibold text-[11px]">
+                              Aprobado
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                alert(
+                                  `Fundamento registrado: ${
+                                    fut.fundamento || 'Sin detalle adicional.'
+                                  }`
+                                )
+                              }
+                              className="p-1.5 bg-[#0B1218] border border-slate-700/80 rounded text-slate-300 hover:text-white transition-colors"
+                              title="Ver fundamento"
+                              aria-label="Ver fundamento"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
               </table>
             </div>
           </div>
-
         </div>
 
-        {/* Columna Derecha (4 columnas) */}
-        <div className="lg:col-span-4 space-y-6">
-          
-          {/* Agenda del Día */}
+        {/* Columna derecha (4 cols) */}
+        <div className="lg:col-span-4 space-y-5 min-w-0">
+          {/* Agenda del día */}
           <div className={cardStyle}>
-            <div className={`flex items-center justify-between border-b pb-3 ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
-              <h3 className={`text-xs font-bold uppercase tracking-wider flex items-center gap-2 ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                <Clock className="w-4 h-4 text-blue-500" />
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-[#A8D5EE]" />
                 <span>Agenda de Hoy</span>
               </h3>
-              <span className="text-[10px] font-mono text-slate-400">10 OCT 2026</span>
+              <span className="text-[11px] font-mono text-slate-400">2026-II</span>
             </div>
 
-            <div className={`space-y-4 pl-2 border-l-2 relative my-4 ${isDarkMode ? 'border-slate-800' : 'border-slate-200'}`}>
-              <div className="relative pl-4 space-y-1">
-                <div className={`absolute -left-[13px] top-1 w-2.5 h-2.5 rounded-full bg-blue-500 ring-4 ${isDarkMode ? 'ring-[#121722]' : 'ring-white'}`}></div>
-                <span className="text-[10px] font-bold text-blue-500">10:00 AM - 11:30 AM</span>
-                <h4 className={`text-xs font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Historia del Arte Moderno</h4>
-                <p className={`text-[11px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Aula 102 • Grupo 4B</p>
+            <div className="space-y-3.5 my-4">
+              <div className="bg-[#0B1218] border border-slate-800 rounded-md p-3 space-y-1">
+                <span className="text-[10px] font-bold uppercase text-[#A8D5EE]">
+                  10:00 - 11:30
+                </span>
+                <h4 className="text-xs font-bold text-white">Sesión Teórica · Grupo 4B</h4>
+                <p className="text-[11px] text-slate-400">Aula 102 · Pabellón B</p>
               </div>
 
-              <div className="relative pl-4 space-y-1">
-                <div className={`absolute -left-[13px] top-1 w-2.5 h-2.5 rounded-full bg-slate-500 ring-4 ${isDarkMode ? 'ring-[#121722]' : 'ring-white'}`}></div>
-                <span className="text-[10px] font-bold text-slate-400">12:00 PM - 01:30 PM</span>
-                <h4 className={`text-xs font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Técnicas de Pintura</h4>
-                <p className={`text-[11px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Taller 3 • Grupo 2A</p>
+              <div className="bg-[#0B1218] border border-slate-800 rounded-md p-3 space-y-1">
+                <span className="text-[10px] font-bold uppercase text-slate-400">
+                  12:00 - 13:30
+                </span>
+                <h4 className="text-xs font-bold text-white">Práctica Dirigida · Grupo 2A</h4>
+                <p className="text-[11px] text-slate-400">Aula 204 · Pabellón A</p>
               </div>
             </div>
 
-            <button className={`w-full py-2 border rounded-xl text-xs font-medium transition-colors ${
-              isDarkMode ? 'bg-[#0B0F17] border-slate-800 text-slate-300 hover:bg-slate-800' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-            }`}>
+            <button
+              type="button"
+              onClick={() => onNavigate('horarios')}
+              className="w-full py-2 bg-[#0B1218] hover:bg-slate-800 border border-slate-700/80 rounded-md text-xs font-semibold text-slate-200 transition-colors"
+            >
               Ver horario completo
             </button>
           </div>
 
-          {/* Accesos Rápidos */}
+          {/* Accesos rápidos */}
           <div className={cardStyle}>
-            <h3 className={`text-xs font-bold uppercase tracking-wider mb-3 ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3">
               Accesos Rápidos
             </h3>
 
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: 'Subir Material', icon: Upload, color: 'text-blue-500' },
-                { label: 'Enviar Anuncio', icon: Send, color: 'text-emerald-500' },
-                { label: 'Firmar Actas', icon: Award, color: 'text-purple-500' },
-                { label: 'Soporte', icon: HelpCircle, color: 'text-amber-500' }
-              ].map((acc, idx) => {
-                const AccIcon = acc.icon;
-                return (
-                  <button key={idx} className={`p-3 border rounded-xl flex flex-col items-center justify-center gap-2 group transition-all ${
-                    isDarkMode ? 'bg-[#0B0F17] border-slate-800/80 hover:border-slate-700' : 'bg-slate-50 border-slate-200 hover:border-slate-300'
-                  }`}>
-                    <AccIcon className={`w-5 h-5 ${acc.color} group-hover:scale-110 transition-transform`} />
-                    <span className={`text-[11px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{acc.label}</span>
-                  </button>
-                );
-              })}
+            <div className="grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                onClick={() => onNavigate('cursos')}
+                className="p-3 bg-[#0B1218] border border-slate-800 hover:border-[#0084C2]/60 rounded-md flex flex-col items-center justify-center gap-1.5 transition-colors"
+              >
+                <Upload className="w-4 h-4 text-[#A8D5EE]" />
+                <span className="text-xs font-medium text-slate-200">Material y cursos</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigate('calificaciones')}
+                className="p-3 bg-[#0B1218] border border-slate-800 hover:border-[#0084C2]/60 rounded-md flex flex-col items-center justify-center gap-1.5 transition-colors"
+              >
+                <Award className="w-4 h-4 text-[#A8D5EE]" />
+                <span className="text-xs font-medium text-slate-200">Calificaciones</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigate('asistencias')}
+                className="p-3 bg-[#0B1218] border border-slate-800 hover:border-[#0084C2]/60 rounded-md flex flex-col items-center justify-center gap-1.5 transition-colors"
+              >
+                <Send className="w-4 h-4 text-[#A8D5EE]" />
+                <span className="text-xs font-medium text-slate-200">Asistencias</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigate('horarios')}
+                className="p-3 bg-[#0B1218] border border-slate-800 hover:border-[#0084C2]/60 rounded-md flex flex-col items-center justify-center gap-1.5 transition-colors"
+              >
+                <HelpCircle className="w-4 h-4 text-[#A8D5EE]" />
+                <span className="text-xs font-medium text-slate-200">Cronograma</span>
+              </button>
             </div>
           </div>
-
         </div>
-
       </div>
-
     </div>
   );
 }
