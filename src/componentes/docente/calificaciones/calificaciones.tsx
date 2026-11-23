@@ -1,528 +1,573 @@
-import React, { useState } from 'react';
-import { 
-  Search, 
-  Bell, 
-  ShieldCheck, 
-  ChevronDown, 
-  Download, 
-  Send, 
-  Eye, 
-  AlertTriangle, 
-  CheckCircle2, 
-  Clock, 
-  FileText, 
-  RefreshCw, 
+import React, { useState, useMemo } from 'react';
+import {
+  Search,
+  ShieldCheck,
+  ChevronDown,
+  Download,
+  Send,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  FileText,
   Info,
   ChevronLeft,
   ChevronRight,
-  Sparkles
+  SlidersHorizontal
 } from 'lucide-react';
 
-export default function CalificacionesPanel() {
-  const [activeTab, setActiveTab] = useState('Todos');
-  const [portalEstudianteVisible, setPortalEstudianteVisible] = useState(true);
+interface EstudianteNota {
+  id: string;
+  nombre: string;
+  iniciales: string;
+  ec1: string;
+  ep: string;
+  ec2: string;
+  tf: string;
+  estado: 'aprobado' | 'riesgo' | 'desaprobado';
+  fut?: boolean;
+  alerta?: boolean;
+}
 
-  // Datos simulados de los estudiantes
-  const estudiantes = [
-    {
-      id: '2022-10492',
-      nombre: 'Ana García Méndez',
-      avatar: 'AG',
-      color: 'bg-purple-600',
-      ec1: '16.5',
-      ep: '15.0',
-      ec2: '17.0',
-      tf: '18.0*',
-      estado: 'aprobado'
-    },
-    {
-      id: '2021-08731',
-      nombre: 'Carlos Ruiz Dávila',
-      avatar: 'CR',
-      color: 'bg-amber-600',
-      ec1: '14.0',
-      ep: '11.0',
-      ec2: '13.5',
-      tf: '12.0*',
-      estado: 'aprobado',
-      fut: true
-    },
-    {
-      id: '2023-14205',
-      nombre: 'Elena Díaz Vargas',
-      avatar: 'ED',
-      color: 'bg-rose-600',
-      ec1: '08.5',
-      ep: '09.0',
-      ec2: '10.0',
-      tf: '--',
-      estado: 'desaprobado',
-      alerta: true
-    },
-    {
-      id: '2022-11840',
-      nombre: 'Sofía Morales Benítez',
-      avatar: 'SM',
-      color: 'bg-cyan-600',
-      ec1: '15.0',
-      ep: '14.0',
-      ec2: '16.0',
-      tf: '15.0*',
-      estado: 'aprobado'
-    },
-    {
-      id: '2021-09452',
-      nombre: 'Lucas Romero Quispe',
-      avatar: 'LR',
-      color: 'bg-emerald-600',
-      ec1: '11.0',
-      ep: '10.5',
-      ec2: '12.0',
-      tf: '11.0*',
-      estado: 'riesgo'
-    }
-  ];
+const ESTUDIANTES: EstudianteNota[] = [
+  {
+    id: '2022-10492',
+    nombre: 'Ana García Méndez',
+    iniciales: 'AG',
+    ec1: '16.5',
+    ep: '15.0',
+    ec2: '17.0',
+    tf: '18.0*',
+    estado: 'aprobado'
+  },
+  {
+    id: '2021-08731',
+    nombre: 'Carlos Ruiz Dávila',
+    iniciales: 'CR',
+    ec1: '14.0',
+    ep: '11.0',
+    ec2: '13.5',
+    tf: '12.0*',
+    estado: 'aprobado',
+    fut: true
+  },
+  {
+    id: '2023-14205',
+    nombre: 'Elena Díaz Vargas',
+    iniciales: 'ED',
+    ec1: '08.5',
+    ep: '09.0',
+    ec2: '10.0',
+    tf: '--',
+    estado: 'desaprobado',
+    alerta: true
+  },
+  {
+    id: '2022-11840',
+    nombre: 'Sofía Morales Benítez',
+    iniciales: 'SM',
+    ec1: '15.0',
+    ep: '14.0',
+    ec2: '16.0',
+    tf: '15.0*',
+    estado: 'aprobado'
+  },
+  {
+    id: '2021-09452',
+    nombre: 'Lucas Romero Quispe',
+    iniciales: 'LR',
+    ec1: '11.0',
+    ep: '10.5',
+    ec2: '12.0',
+    tf: '11.0*',
+    estado: 'riesgo'
+  }
+];
+
+export default function CalificacionesPanel() {
+  const [activeTab, setActiveTab] = useState<'Todos' | 'Aprobados' | 'Riesgo' | 'Desaprobados'>('Todos');
+  const [codigoBusqueda, setCodigoBusqueda] = useState<string>('');
+  const [portalEstudianteVisible, setPortalEstudianteVisible] = useState<boolean>(true);
+  const [actaCerrada, setActaCerrada] = useState<boolean>(false);
+
+  const estudiantesFiltrados = useMemo(() => {
+    const q = codigoBusqueda.trim().toLowerCase();
+    return ESTUDIANTES.filter((est) => {
+      const cumpleEstado =
+        activeTab === 'Todos' ||
+        (activeTab === 'Aprobados' && est.estado === 'aprobado') ||
+        (activeTab === 'Riesgo' && est.estado === 'riesgo') ||
+        (activeTab === 'Desaprobados' && est.estado === 'desaprobado');
+
+      const cumpleCodigo =
+        !q ||
+        est.id.toLowerCase().includes(q) ||
+        est.nombre.toLowerCase().includes(q);
+
+      return cumpleEstado && cumpleCodigo;
+    });
+  }, [activeTab, codigoBusqueda]);
 
   return (
-    <div className="space-y-6 text-slate-100 font-sans">
-      
-      {/* 1. Header Principal y Acción Crítica de Actas */}
-      <div className="bg-[#131927] border border-slate-800 rounded-2xl p-5 space-y-4">
+    <div className="space-y-5 text-slate-200">
+      {/* Encabezado y selectores de registro */}
+      <div className="bg-[#111C26] border border-slate-800 rounded-lg p-4 sm:p-5 space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs">
-              <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 font-bold border border-blue-500/20 rounded uppercase text-[10px]">
-                ACTAS OFICIALES V4.2
+          <div className="space-y-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="px-2 py-0.5 bg-[#002B45] text-[#A8D5EE] font-semibold border border-[#0084C2]/30 rounded text-[11px]">
+                Registro Académico
               </span>
-              <span className="text-emerald-400 flex items-center gap-1 text-[11px] font-medium">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                Sincronizado con SUNEDU
-              </span>
+              <span className="text-slate-400 text-xs">Periodo 2026-II</span>
             </div>
-            <h1 className="text-xl font-bold text-white tracking-tight">
-              Gestión de Calificaciones y Actas Oficiales
+            <h1 className="text-base sm:text-xl font-bold text-white">
+              Calificaciones y Actas de Evaluación
             </h1>
             <p className="text-xs text-slate-400">
-              Consolidación ponderada reglamentaria, auditoría por rúbricas y certificación digital del registro académico.
+              Consolidado de notas parciales y continuas para el registro y cierre de acta del curso.
             </p>
           </div>
 
-          <button className="flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition-all shadow-lg shadow-blue-600/25 self-start lg:self-auto">
-            <ShieldCheck className="w-4 h-4" />
-            <span>Cerrar y Firmar Acta Oficial</span>
-            <span className="text-[10px] bg-blue-700 px-1.5 py-0.5 rounded font-mono ml-1">RENIEC / SUNEDU</span>
+          <button
+            type="button"
+            onClick={() => setActaCerrada((prev) => !prev)}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0084C2] hover:bg-[#0073A8] text-white font-semibold text-xs rounded-md transition-colors self-start lg:self-auto shrink-0"
+          >
+            <ShieldCheck className="w-4 h-4 shrink-0" />
+            <span>{actaCerrada ? 'Acta registrada' : 'Cerrar y registrar acta'}</span>
           </button>
         </div>
 
-        {/* Selectores de Curso, Período y Sección */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-slate-800/80">
-          
-          <div className="bg-[#0B0F17] border border-slate-800 rounded-xl p-3 flex items-center justify-between cursor-pointer hover:border-slate-700 transition-colors">
-            <div>
-              <p className="text-[10px] text-slate-500 uppercase font-bold">Asignatura</p>
-              <p className="text-xs font-bold text-white flex items-center gap-2 mt-0.5">
-                <span>Historia del Arte Moderno</span>
-                <span className="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.2 rounded font-mono">HAR-302</span>
+        {/* Datos del curso, periodo y sección */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-slate-800">
+          <div className="bg-[#0B1218] border border-slate-800 rounded-md p-3 flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[10px] text-slate-400 uppercase font-bold">Asignatura</p>
+              <p className="text-xs font-bold text-white flex items-center gap-2 mt-0.5 truncate">
+                <span className="truncate">Historia del Arte Moderno</span>
+                <span className="text-[10px] text-[#A8D5EE] bg-[#002B45] px-1.5 py-0.5 rounded font-mono shrink-0">
+                  HAR-302
+                </span>
               </p>
-              <p className="text-[10px] text-slate-400">Facultad de Artes y Diseño • Grupo 4B</p>
+              <p className="text-[11px] text-slate-400 truncate mt-0.5">
+                Especialidad · Grupo 4B
+              </p>
             </div>
-            <ChevronDown className="w-4 h-4 text-slate-400" />
+            <ChevronDown className="w-4 h-4 text-slate-500 shrink-0" />
           </div>
 
-          <div className="bg-[#0B0F17] border border-slate-800 rounded-xl p-3 flex items-center justify-between cursor-pointer hover:border-slate-700 transition-colors">
-            <div>
-              <p className="text-[10px] text-slate-500 uppercase font-bold">Período</p>
+          <div className="bg-[#0B1218] border border-slate-800 rounded-md p-3 flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[10px] text-slate-400 uppercase font-bold">Periodo lectivo</p>
               <p className="text-xs font-bold text-white mt-0.5">Ciclo 2026-II</p>
-              <p className="text-[10px] text-emerald-400">Activo (En evaluación)</p>
+              <p className="text-[11px] text-[#A8D5EE] mt-0.5">En evaluación</p>
             </div>
-            <ChevronDown className="w-4 h-4 text-slate-400" />
+            <ChevronDown className="w-4 h-4 text-slate-500 shrink-0" />
           </div>
 
-          <div className="bg-[#0B0F17] border border-slate-800 rounded-xl p-3 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] text-slate-500 uppercase font-bold">Estudiantes Asignados</p>
-              <p className="text-xs font-bold text-white mt-0.5">Sección B • 38 Alumnos</p>
-              <p className="text-[10px] text-slate-400">Sede Central</p>
+          <div className="bg-[#0B1218] border border-slate-800 rounded-md p-3 flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[10px] text-slate-400 uppercase font-bold">Matrícula asignada</p>
+              <p className="text-xs font-bold text-white mt-0.5">Sección B · 38 estudiantes</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Sede institucional</p>
             </div>
-            <span className="w-2 h-2 rounded-full bg-blue-500"></span>
           </div>
-
         </div>
       </div>
 
-      {/* 2. Estructura Ponderada de la Asignatura */}
-      <div className="bg-[#131927] border border-slate-800 rounded-2xl p-5 space-y-4">
+      {/* Estructura ponderada */}
+      <div className="bg-[#111C26] border border-slate-800 rounded-lg p-4 sm:p-5 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
           <div>
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-blue-400" />
-              <span>Estructura Ponderada de la Asignatura</span>
-            </h3>
-            <p className="text-xs text-slate-400">Parámetros validados según el Sílabo Oficial 2026-II y directiva vicerrectoral.</p>
+            <h2 className="text-sm font-bold text-white flex items-center gap-2">
+              <SlidersHorizontal className="w-4 h-4 text-[#A8D5EE]" />
+              <span>Ponderación de Evaluaciones</span>
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Esquema de rubros y avances registrados para el periodo vigente.
+            </p>
           </div>
-          <span className="text-[11px] font-medium text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20 self-start sm:self-auto">
-            Nota mínima aprobatoria: <strong>10.5 / 20.0 pts</strong>
+          <span className="text-[11px] font-semibold text-[#A8D5EE] bg-[#002B45] px-2.5 py-1 rounded border border-[#0084C2]/30 self-start sm:self-auto">
+            Nota mínima aprobatoria: <strong>10.5 / 20.0</strong>
           </span>
         </div>
 
-        {/* Tarjetas de Hitos Ponderados */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          
-          <div className="bg-[#0B0F17] border border-slate-800 rounded-xl p-3 space-y-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="bg-[#0B1218] border border-slate-800 rounded-md p-3.5 space-y-1.5">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-400 uppercase font-bold text-[10px]">Criterio I</span>
-              <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 font-extrabold rounded">20%</span>
+              <span className="text-slate-400 uppercase font-bold text-[10px]">Rubro 1</span>
+              <span className="px-2 py-0.5 bg-[#002B45] text-[#A8D5EE] font-bold rounded">20%</span>
             </div>
-            <h4 className="text-xs font-bold text-white">Eval. Continua 1</h4>
-            <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium">
-              <CheckCircle2 className="w-3 h-3" />
-              <span>Evaluado • 100% Entregas</span>
+            <h3 className="text-xs font-bold text-white">Eval. Continua 1</h3>
+            <div className="flex items-center gap-1.5 text-[11px] text-emerald-300 font-medium">
+              <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+              <span>Registrado · 100%</span>
             </div>
           </div>
 
-          <div className="bg-[#0B0F17] border border-slate-800 rounded-xl p-3 space-y-2">
+          <div className="bg-[#0B1218] border border-slate-800 rounded-md p-3.5 space-y-1.5">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-400 uppercase font-bold text-[10px]">Hito Central</span>
-              <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 font-extrabold rounded">30%</span>
+              <span className="text-slate-400 uppercase font-bold text-[10px]">Rubro 2</span>
+              <span className="px-2 py-0.5 bg-[#002B45] text-[#A8D5EE] font-bold rounded">30%</span>
             </div>
-            <h4 className="text-xs font-bold text-white">Examen Parcial</h4>
-            <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium">
-              <CheckCircle2 className="w-3 h-3" />
-              <span>Evaluado • 100% Actas</span>
+            <h3 className="text-xs font-bold text-white">Examen Parcial</h3>
+            <div className="flex items-center gap-1.5 text-[11px] text-emerald-300 font-medium">
+              <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+              <span>Registrado · 100%</span>
             </div>
           </div>
 
-          <div className="bg-[#0B0F17] border border-blue-500/40 rounded-xl p-3 space-y-2 relative overflow-hidden">
+          <div className="bg-[#0B1218] border border-[#0084C2]/50 rounded-md p-3.5 space-y-1.5">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-blue-400 uppercase font-bold text-[10px]">Criterio II</span>
-              <span className="px-2 py-0.5 bg-blue-500 text-white font-extrabold rounded">20%</span>
+              <span className="text-[#A8D5EE] uppercase font-bold text-[10px]">Rubro 3</span>
+              <span className="px-2 py-0.5 bg-[#0084C2] text-white font-bold rounded">20%</span>
             </div>
-            <h4 className="text-xs font-bold text-white">Eval. Continua 2</h4>
-            <div className="flex items-center gap-1.5 text-[10px] text-amber-400 font-medium">
-              <Clock className="w-3 h-3" />
-              <span>En Curso • 75% Calificado</span>
+            <h3 className="text-xs font-bold text-white">Eval. Continua 2</h3>
+            <div className="flex items-center gap-1.5 text-[11px] text-amber-300 font-medium">
+              <Clock className="w-3.5 h-3.5 shrink-0" />
+              <span>En proceso · 75%</span>
             </div>
           </div>
 
-          <div className="bg-[#0B0F17] border border-slate-800 rounded-xl p-3 space-y-2 opacity-70">
+          <div className="bg-[#0B1218] border border-slate-800 rounded-md p-3.5 space-y-1.5">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-500 uppercase font-bold text-[10px]">Cierre Final</span>
-              <span className="px-2 py-0.5 bg-slate-800 text-slate-400 font-extrabold rounded">30%</span>
+              <span className="text-slate-400 uppercase font-bold text-[10px]">Rubro 4</span>
+              <span className="px-2 py-0.5 bg-[#111C26] text-slate-300 border border-slate-700 font-bold rounded">
+                30%
+              </span>
             </div>
-            <h4 className="text-xs font-bold text-slate-300">Trabajo Final</h4>
-            <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
-              <span>Pendiente • Apertura S16</span>
+            <h3 className="text-xs font-bold text-white">Trabajo Final</h3>
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
+              <span>Pendiente de cierre</span>
             </div>
           </div>
-
         </div>
 
-        {/* Barra de Progreso del Ciclo */}
-        <div className="space-y-1.5 pt-2">
+        {/* Barra de avance */}
+        <div className="space-y-1.5 pt-1">
           <div className="flex items-center justify-between text-xs font-medium">
-            <span className="text-slate-300 flex items-center gap-2">
-              <span>Avance Evaluativo del Ciclo</span>
-              <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.2 rounded font-bold">HITO ACTIVO</span>
+            <span className="text-slate-300">Avance del registro evaluativo</span>
+            <span className="text-white font-bold">
+              70% <span className="text-slate-400 font-normal">completado</span>
             </span>
-            <span className="text-white font-bold">70% <span className="text-slate-400 font-normal">completado</span></span>
           </div>
-          <div className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden flex">
-            <div className="w-[20%] bg-blue-600 h-full border-r border-slate-900" title="EC1 20%"></div>
-            <div className="w-[30%] bg-cyan-500 h-full border-r border-slate-900" title="EP 30%"></div>
-            <div className="w-[20%] bg-amber-500 h-full border-r border-slate-900" title="EC2 20%"></div>
-            <div className="w-[30%] bg-slate-800 h-full" title="TF 30%"></div>
-          </div>
-          <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1">
-            <span>• EC1 (20%) + EP (30%)</span>
-            <span>• EC2 (20% en proceso)</span>
-            <span>• TF (30% restante)</span>
+          <div className="w-full h-2 bg-[#0B1218] rounded overflow-hidden flex border border-slate-800">
+            <div className="w-[20%] bg-[#0084C2] h-full" />
+            <div className="w-[30%] bg-[#A8D5EE] h-full" />
+            <div className="w-[20%] bg-amber-400 h-full" />
+            <div className="w-[30%] bg-[#111C26] h-full" />
           </div>
         </div>
       </div>
 
-      {/* 3. Matriz de Notas (Tabla Principal) + Barra Lateral de Acciones (Grid 12) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* COLUMNA IZQUIERDA: Matriz de Notas (8 cols) */}
-        <div className="lg:col-span-8 bg-[#131927] border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4">
-          
-          {/* Tabs de Filtro de Alumnos */}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
-            <div className="flex items-center gap-1.5 bg-[#0B0F17] p-1 rounded-xl border border-slate-800 text-xs">
-              {[
-                { id: 'Todos', label: 'Todos', count: 38 },
-                { id: 'Aprobados', label: 'Aprobados', count: 29 },
-                { id: 'Riesgo', label: 'En Riesgo', count: 6 },
-                { id: 'Desaprobados', label: 'Desaprobados', count: 3 },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
-                    activeTab === tab.id
-                      ? 'bg-blue-600 text-white shadow'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <span>{tab.label}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                    activeTab === tab.id ? 'bg-blue-700 text-white' : 'bg-slate-800 text-slate-400'
-                  }`}>
-                    {tab.count}
-                  </span>
-                </button>
-              ))}
+      {/* Tabla principal + Acciones laterales */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Tabla de notas (8 cols) */}
+        <div className="lg:col-span-8 bg-[#111C26] border border-slate-800 rounded-lg p-4 sm:p-5 space-y-4 min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex items-center gap-1.5 bg-[#0B1218] p-1 rounded-md border border-slate-800 text-xs w-max">
+                {(
+                  [
+                    { id: 'Todos', label: 'Todos', count: 38 },
+                    { id: 'Aprobados', label: 'Aprobados', count: 29 },
+                    { id: 'Riesgo', label: 'En riesgo', count: 6 },
+                    { id: 'Desaprobados', label: 'Desaprobados', count: 3 }
+                  ] as const
+                ).map((tab) => {
+                  const activa = activeTab === tab.id;
+                  return (
+                    <button
+                      type="button"
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`px-2.5 py-1.5 rounded font-semibold transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+                        activa
+                          ? 'bg-[#002B45] text-white border border-[#0084C2]/50'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      <span>{tab.label}</span>
+                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#111C26] text-slate-300">
+                        {tab.count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            <div className="relative">
+            <div className="relative w-full sm:w-44">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-              <input 
-                type="text" 
-                placeholder="Buscar por código..." 
-                className="bg-[#0B0F17] border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 w-40"
+              <input
+                type="text"
+                value={codigoBusqueda}
+                onChange={(e) => setCodigoBusqueda(e.target.value)}
+                placeholder="Buscar código o alumno..."
+                className="w-full bg-[#0B1218] border border-slate-700/80 rounded-md pl-8 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#0084C2]"
               />
             </div>
           </div>
 
-          {/* Tabla de Calificaciones */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[#0B0F17] text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+          <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <table className="w-full text-left text-xs min-w-[520px]">
+              <thead className="bg-[#0B1218] text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
                 <tr>
-                  <th className="py-3 px-3">Estudiante</th>
-                  <th className="py-3 px-2 text-center">EC1 (20%)</th>
-                  <th className="py-3 px-2 text-center">EP (30%)</th>
-                  <th className="py-3 px-2 text-center bg-blue-950/20 text-blue-400 border-x border-blue-900/30">
-                    EC2 (20%) ♦
+                  <th className="py-2.5 px-3 font-bold">Estudiante</th>
+                  <th className="py-2.5 px-2 text-center font-bold">EC1 (20%)</th>
+                  <th className="py-2.5 px-2 text-center font-bold">EP (30%)</th>
+                  <th className="py-2.5 px-2 text-center font-bold text-[#A8D5EE] bg-[#002B45]/40">
+                    EC2 (20%)
                   </th>
-                  <th className="py-3 px-2 text-center">TF (30%)</th>
+                  <th className="py-2.5 px-2 text-center font-bold">TF (30%)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 font-mono">
-                {estudiantes.map((est) => (
-                  <tr key={est.id} className="hover:bg-slate-800/30 transition-colors">
-                    <td className="py-3 px-3 font-sans">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-7 h-7 rounded-full ${est.color} flex items-center justify-center font-bold text-[10px] text-white`}>
-                          {est.avatar}
-                        </div>
-                        <div>
-                          <p className="font-bold text-white text-xs flex items-center gap-1.5">
-                            <span>{est.nombre}</span>
-                            {est.fut && (
-                              <span className="text-[9px] bg-amber-500/20 text-amber-400 px-1 rounded font-mono">FUT</span>
-                            )}
-                            {est.alerta && (
-                              <AlertTriangle className="w-3.5 h-3.5 text-rose-500" />
-                            )}
-                          </p>
-                          <p className="text-[10px] text-slate-500">{est.id}</p>
-                        </div>
-                      </div>
+              <tbody className="divide-y divide-slate-800/80 font-mono">
+                {estudiantesFiltrados.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-6 text-center font-sans text-xs text-slate-400">
+                      No hay estudiantes que coincidan con el filtro seleccionado.
                     </td>
-
-                    <td className="py-3 px-2 text-center text-slate-300 font-semibold">{est.ec1}</td>
-                    <td className="py-3 px-2 text-center text-slate-300 font-semibold">{est.ep}</td>
-                    
-                    {/* Celda Activa EC2 */}
-                    <td className="py-3 px-2 text-center bg-blue-950/10 border-x border-blue-900/20">
-                      <span className={`px-2 py-1 rounded font-extrabold ${
-                        parseFloat(est.ec2) < 10.5 
-                          ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' 
-                          : 'bg-slate-800 text-white'
-                      }`}>
-                        {est.ec2}
-                      </span>
-                    </td>
-
-                    <td className="py-3 px-2 text-center text-slate-500 italic">{est.tf}</td>
                   </tr>
-                ))}
+                ) : (
+                  estudiantesFiltrados.map((est) => (
+                    <tr key={est.id} className="hover:bg-[#0B1218]/60 transition-colors">
+                      <td className="py-3 px-3 font-sans">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded bg-[#002B45] border border-[#0084C2]/30 flex items-center justify-center font-bold text-[10px] text-[#A8D5EE] shrink-0">
+                            {est.iniciales}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-bold text-white text-xs flex items-center gap-1.5 truncate">
+                              <span className="truncate">{est.nombre}</span>
+                              {est.fut && (
+                                <span className="text-[9px] bg-[#002B45] text-[#A8D5EE] border border-[#0084C2]/30 px-1.5 py-0.2 rounded font-mono shrink-0">
+                                  FUT
+                                </span>
+                              )}
+                              {est.alerta && (
+                                <AlertTriangle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                              )}
+                            </p>
+                            <p className="text-[10px] text-slate-500">{est.id}</p>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="py-3 px-2 text-center text-slate-200 font-semibold">
+                        {est.ec1}
+                      </td>
+                      <td className="py-3 px-2 text-center text-slate-200 font-semibold">
+                        {est.ep}
+                      </td>
+                      <td className="py-3 px-2 text-center bg-[#002B45]/20">
+                        <span
+                          className={`px-2 py-0.5 rounded font-bold ${
+                            parseFloat(est.ec2) < 10.5
+                              ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
+                              : 'bg-[#0B1218] text-white border border-slate-700/80'
+                          }`}
+                        >
+                          {est.ec2}
+                        </span>
+                      </td>
+                      <td className="py-3 px-2 text-center text-slate-400">{est.tf}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
-          {/* Pie de Tabla y Paginación */}
+          {/* Pie de tabla y paginación */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-800 text-xs text-slate-400">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="text-[11px]">Guardar Cambios Automáticos <strong className="text-emerald-400">(Sincronizado)</strong></span>
-            </div>
+            <span className="text-[11px]">
+              Registro activo · <strong className="text-[#A8D5EE]">Periodo 2026-II</strong>
+            </span>
 
             <div className="flex items-center gap-1">
-              <button className="p-1 bg-[#0B0F17] border border-slate-800 rounded text-slate-400 hover:text-white">
-                <ChevronLeft className="w-4 h-4" />
+              <button
+                type="button"
+                className="p-1.5 bg-[#0B1218] border border-slate-800 rounded text-slate-400 hover:text-white transition-colors"
+                aria-label="Página anterior"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
               </button>
-              <button className="px-2.5 py-1 bg-blue-600 text-white rounded font-bold text-xs">1</button>
-              <button className="px-2.5 py-1 bg-[#0B0F17] border border-slate-800 rounded text-slate-400 hover:text-white text-xs">2</button>
-              <button className="px-2.5 py-1 bg-[#0B0F17] border border-slate-800 rounded text-slate-400 hover:text-white text-xs">3</button>
-              <span className="text-slate-600 px-1">...</span>
-              <button className="px-2.5 py-1 bg-[#0B0F17] border border-slate-800 rounded text-slate-400 hover:text-white text-xs">8</button>
-              <button className="p-1 bg-[#0B0F17] border border-slate-800 rounded text-slate-400 hover:text-white">
-                <ChevronRight className="w-4 h-4" />
+              <button
+                type="button"
+                className="px-2.5 py-1 bg-[#002B45] border border-[#0084C2]/50 text-white rounded font-bold text-xs"
+              >
+                1
+              </button>
+              <button
+                type="button"
+                className="px-2.5 py-1 bg-[#0B1218] border border-slate-800 rounded text-slate-400 hover:text-white text-xs"
+              >
+                2
+              </button>
+              <button
+                type="button"
+                className="p-1.5 bg-[#0B1218] border border-slate-800 rounded text-slate-400 hover:text-white transition-colors"
+                aria-label="Página siguiente"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          {/* Nota Aclaratoria sobre Redondeo */}
-          <div className="p-3 bg-[#0B0F17] border border-slate-800/80 rounded-xl flex items-start gap-2.5 text-[11px] text-slate-400">
-            <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+          <div className="p-3 bg-[#0B1218] border border-slate-800 rounded-md flex items-start gap-2.5 text-[11px] text-slate-400">
+            <Info className="w-4 h-4 text-[#A8D5EE] shrink-0 mt-0.5" />
             <p className="leading-relaxed">
-              <strong className="text-slate-300">Política Oficial de Redondeo:</strong> De acuerdo con el Reglamento General de Estudios, el promedio ponderado final admite fracción decimal de hasta 0.5 puntos como redondeo a favor del estudiante exclusivamente en el acta final definitiva. Las notas proyectadas con asterisco (*) reflejan el cálculo preliminar estimativo.
+              Las notas marcadas con asterisco (*) corresponden a cálculos preliminares de referencia hasta el cierre definitivo del acta.
             </p>
           </div>
-
         </div>
 
-        {/* COLUMNA DERECHA: Acciones del Acta + Métricas + FUTs (4 cols) */}
-        <div className="lg:col-span-4 space-y-6">
-          
-          {/* Acciones de Cierre de Acta */}
-          <div className="bg-[#131927] border border-slate-800 rounded-2xl p-5 space-y-4">
+        {/* Columna derecha: Acciones, Rendimiento y FUTs (4 cols) */}
+        <div className="lg:col-span-4 space-y-5 min-w-0">
+          {/* Acciones del acta */}
+          <div className="bg-[#111C26] border border-slate-800 rounded-lg p-4 sm:p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
                 Acciones del Acta
               </h3>
-              <span className="px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[10px] font-bold rounded">
-                BORRADOR ABIERTO
+              <span className="px-2 py-0.5 bg-[#002B45] text-[#A8D5EE] border border-[#0084C2]/30 text-[10px] font-semibold rounded">
+                {actaCerrada ? 'Cerrada' : 'Borrador'}
               </span>
             </div>
 
-            <div className="p-3 bg-[#0B0F17] border border-slate-800 rounded-xl flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <Clock className="w-4 h-4 text-amber-400" />
-                <div>
-                  <p className="text-xs font-bold text-white">Cierre de actas ordinarias</p>
-                  <p className="text-[10px] text-slate-400">Vence en 4 días</p>
-                </div>
+            <div className="p-3 bg-[#0B1218] border border-slate-800 rounded-md flex items-center gap-2.5">
+              <Clock className="w-4 h-4 text-[#A8D5EE] shrink-0" />
+              <div>
+                <p className="text-xs font-bold text-white">Plazo de cierre ordinario</p>
+                <p className="text-[11px] text-slate-400">Vence en 4 días</p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <button className="w-full py-2.5 bg-[#0B0F17] hover:bg-slate-800 border border-slate-800 rounded-xl text-xs font-semibold text-slate-200 transition-colors flex items-center justify-center gap-2">
-                <Download className="w-4 h-4 text-slate-400" />
-                <span>Exportar Acta Oficial (PDF / Excel)</span>
+              <button
+                type="button"
+                className="w-full py-2 px-3 bg-[#0B1218] hover:bg-slate-800 border border-slate-700/80 rounded-md text-xs font-semibold text-slate-200 transition-colors flex items-center justify-center gap-2"
+              >
+                <Download className="w-4 h-4 text-[#A8D5EE]" />
+                <span>Exportar acta (PDF / Excel)</span>
               </button>
 
-              <button className="w-full py-2.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-2">
+              <button
+                type="button"
+                className="w-full py-2 px-3 bg-[#0084C2] hover:bg-[#0073A8] text-white rounded-md text-xs font-semibold transition-colors flex items-center justify-center gap-2"
+              >
                 <Send className="w-4 h-4" />
-                <span>Publicar Calificaciones a Alumnos</span>
+                <span>Publicar notas a estudiantes</span>
               </button>
             </div>
 
-            {/* Switch de Visibilidad */}
-            <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
+            <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-3 text-xs">
               <div>
-                <p className="font-semibold text-slate-300">Portal del Estudiante</p>
-                <p className="text-[10px] text-slate-500">Visualización inmediata de EC2</p>
+                <p className="font-semibold text-slate-200">Visibilidad en portal</p>
+                <p className="text-[11px] text-slate-400">Mostrar avance de notas</p>
               </div>
-              <button 
+              <button
+                type="button"
                 onClick={() => setPortalEstudianteVisible(!portalEstudianteVisible)}
-                className={`w-11 h-6 rounded-full p-1 transition-colors ${portalEstudianteVisible ? 'bg-emerald-500' : 'bg-slate-800'}`}
+                aria-label="Alternar visibilidad en portal del estudiante"
+                className={`w-10 h-5 rounded-full p-0.5 transition-colors shrink-0 ${
+                  portalEstudianteVisible ? 'bg-[#0084C2]' : 'bg-slate-700'
+                }`}
               >
-                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${portalEstudianteVisible ? 'translate-x-5' : 'translate-x-0'}`} />
+                <div
+                  className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                    portalEstudianteVisible ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
               </button>
             </div>
           </div>
 
-          {/* Rendimiento Académico */}
-          <div className="bg-[#131927] border border-slate-800 rounded-2xl p-5 space-y-4">
+          {/* Rendimiento académico */}
+          <div className="bg-[#111C26] border border-slate-800 rounded-lg p-4 sm:p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                Rendimiento Académico
+                Rendimiento del Grupo
               </h3>
-              <span className="text-[10px] font-mono text-slate-500">HAR-302</span>
+              <span className="text-[11px] font-mono text-[#A8D5EE]">HAR-302</span>
             </div>
 
-            <div className="flex items-baseline justify-between">
+            <div className="flex items-baseline justify-between gap-2">
               <div>
-                <p className="text-[10px] text-slate-400 uppercase font-bold">Promedio de Clase</p>
-                <p className="text-2xl font-extrabold text-white mt-1">
-                  14.2 <span className="text-xs font-normal text-slate-500">/ 20.0</span>
+                <p className="text-[10px] text-slate-400 uppercase font-bold">Promedio general</p>
+                <p className="text-2xl font-extrabold text-white mt-0.5">
+                  14.2 <span className="text-xs font-normal text-slate-400">/ 20.0</span>
                 </p>
               </div>
-              <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded flex items-center gap-1">
-                +0.8 pts <span className="text-[10px] text-slate-500 font-normal">vs. Ciclo 2026-I</span>
+              <span className="text-xs font-semibold text-[#A8D5EE] bg-[#002B45] px-2 py-0.5 rounded border border-[#0084C2]/30">
+                +0.8 pts
               </span>
             </div>
 
-            {/* Distribución por Condición */}
-            <div className="space-y-2 pt-2 border-t border-slate-800/80 text-xs">
-              <p className="text-[10px] text-slate-400 font-bold uppercase">Distribución por Condición <span className="text-slate-500 font-normal">(38 Matriculados)</span></p>
-              
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-[11px]">
-                  <span className="text-slate-300 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span> Aprobados (≥ 12.0)
-                  </span>
-                  <span className="font-bold text-white">29 alumnos <span className="text-slate-500 font-normal">(76%)</span></span>
-                </div>
+            <div className="space-y-2 pt-2 border-t border-slate-800 text-xs">
+              <p className="text-[10px] text-slate-400 font-bold uppercase">
+                Resumen por condición (38 matriculados)
+              </p>
 
-                <div className="flex justify-between text-[11px]">
-                  <span className="text-slate-300 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-amber-400"></span> En Riesgo (10.5 - 11.9)
-                  </span>
-                  <span className="font-bold text-white">6 alumnos <span className="text-slate-500 font-normal">(16%)</span></span>
-                </div>
+              <div className="flex justify-between text-[11px]">
+                <span className="text-slate-300">Aprobados (≥ 10.5)</span>
+                <span className="font-bold text-white">35 estudiantes</span>
+              </div>
 
-                <div className="flex justify-between text-[11px]">
-                  <span className="text-slate-300 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-rose-500"></span> Desaprobados (&lt; 10.5)
-                  </span>
-                  <span className="font-bold text-white">3 alumnos <span className="text-slate-500 font-normal">(8%)</span></span>
-                </div>
+              <div className="flex justify-between text-[11px]">
+                <span className="text-slate-300">En observación</span>
+                <span className="font-bold text-amber-300">6 estudiantes</span>
+              </div>
+
+              <div className="flex justify-between text-[11px]">
+                <span className="text-slate-300">Desaprobados</span>
+                <span className="font-bold text-rose-300">3 estudiantes</span>
               </div>
             </div>
           </div>
 
-          {/* Solicitudes FUT Pendientes */}
-          <div className="bg-[#131927] border border-slate-800 rounded-2xl p-5 space-y-3">
+          {/* Solicitudes FUT */}
+          <div className="bg-[#111C26] border border-slate-800 rounded-lg p-4 sm:p-5 space-y-3">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                <FileText className="w-4 h-4 text-amber-400" />
+                <FileText className="w-4 h-4 text-[#A8D5EE]" />
                 <span>Solicitudes FUT</span>
               </h3>
-              <span className="px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[10px] font-bold rounded">
-                2 Pendientes
+              <span className="px-2 py-0.5 bg-[#002B45] text-[#A8D5EE] border border-[#0084C2]/30 text-[10px] font-semibold rounded">
+                2 pendientes
               </span>
             </div>
 
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              Reclamos oficiales ingresados vía Mesa de Partes Virtual con plazo de resolución docente de 48 horas.
-            </p>
-
-            <div className="space-y-2 pt-1">
-              <div className="p-2.5 bg-[#0B0F17] border border-slate-800 rounded-xl flex items-center justify-between text-xs">
-                <div>
-                  <p className="font-bold text-white">Carlos Ruiz <span className="text-[10px] text-slate-500 font-mono">#4092</span></p>
-                  <p className="text-[10px] text-slate-400 truncate">Examen Parcial • Pregunta 3</p>
+            <div className="space-y-2">
+              <div className="p-2.5 bg-[#0B1218] border border-slate-800 rounded-md flex items-center justify-between gap-2 text-xs">
+                <div className="min-w-0">
+                  <p className="font-bold text-white truncate">Carlos Ruiz · #4092</p>
+                  <p className="text-[11px] text-slate-400 truncate">Revisión de evaluación parcial</p>
                 </div>
-                <button className="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-[11px] font-bold transition-colors">
+                <button
+                  type="button"
+                  className="px-2.5 py-1 bg-[#0084C2] hover:bg-[#0073A8] text-white rounded text-[11px] font-semibold transition-colors shrink-0"
+                >
                   Revisar
                 </button>
               </div>
 
-              <div className="p-2.5 bg-[#0B0F17] border border-slate-800 rounded-xl flex items-center justify-between text-xs">
-                <div>
-                  <p className="font-bold text-white">Elena Díaz <span className="text-[10px] text-slate-500 font-mono">#4105</span></p>
-                  <p className="text-[10px] text-slate-400 truncate">Eval. Continua 1 • Rúbrica</p>
+              <div className="p-2.5 bg-[#0B1218] border border-slate-800 rounded-md flex items-center justify-between gap-2 text-xs">
+                <div className="min-w-0">
+                  <p className="font-bold text-white truncate">Elena Díaz · #4105</p>
+                  <p className="text-[11px] text-slate-400 truncate">Revisión de evaluación continua</p>
                 </div>
-                <button className="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-[11px] font-bold transition-colors">
+                <button
+                  type="button"
+                  className="px-2.5 py-1 bg-[#0084C2] hover:bg-[#0073A8] text-white rounded text-[11px] font-semibold transition-colors shrink-0"
+                >
                   Revisar
                 </button>
               </div>
-            </div>
-
-            <div className="pt-2 flex items-center justify-between text-[10px] text-slate-500">
-              <span>• Autoguardado hace 2 min</span>
-              <button className="text-blue-400 font-bold hover:underline">VER BITÁCORA</button>
             </div>
           </div>
-
         </div>
-
       </div>
-
     </div>
   );
 }
